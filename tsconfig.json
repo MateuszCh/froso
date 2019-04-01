@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": true,
+        "outDir": "./lib",
+        "strict": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "plugins": [{ "name": "typescript-tslint-plugin" }]
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "**/__tests__/*", "src/server.ts"]
+}
