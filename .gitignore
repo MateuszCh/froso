@@ -1,5 +1,5 @@
 /lib
-src/server.ts
+/src/server.ts
 
 # Logs
 logs
