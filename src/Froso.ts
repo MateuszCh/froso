@@ -5,7 +5,7 @@ import { Db, MongoClient, MongoClientOptions } from 'mongodb';
 
 import { forEach } from 'lodash';
 
-import { IComponentData, IFileData, IModelData, IPageData, IPostData, IPostTypeData } from './models';
+import { ICounterData, IFileData, IModelData, IPostData, IPostTypeData } from './models';
 import router from './routers';
 import { IResources, IResourceType, ResourceService } from './services';
 
@@ -22,11 +22,10 @@ export class Froso {
     protected config!: IFrosoConfig;
     protected resources: IResources<any> = {};
     protected resourceTypes: Array<IResourceType<any>> = [
-        { id: 'pages' },
-        { id: 'components' },
         { id: 'files' },
         { id: 'post_types' },
         { id: 'posts' },
+        { id: 'counters', indexes: [{ key: { type: 1 }, unique: true }] },
     ];
 
     protected customRouters: express.Router[] = [];
@@ -47,20 +46,16 @@ export class Froso {
         return this.resources.posts;
     }
 
-    public get pages(): ResourceService<IPageData> {
-        return this.resources.pages;
-    }
-
-    public get components(): ResourceService<IComponentData> {
-        return this.resources.components;
-    }
-
     public get files(): ResourceService<IFileData> {
         return this.resources.files;
     }
 
     public get postTypes(): ResourceService<IPostTypeData> {
         return this.resources.postTypes;
+    }
+
+    public get counters(): ResourceService<ICounterData> {
+        return this.resources.counters;
     }
 
     public async init(config: IFrosoConfig): Promise<Server | undefined> {
@@ -79,8 +74,8 @@ export class Froso {
 
             forEach(this.resourceTypes, (type: IResourceType<any>) => {
                 this.resources[type.id] = type.resourceService
-                    ? new type.resourceService(type.id, this.db)
-                    : new ResourceService(type.id, this.db);
+                    ? new type.resourceService(type.id, this.db, type.indexes)
+                    : new ResourceService(type.id, this.db, type.indexes);
             });
 
             return this.listen();
@@ -90,7 +85,7 @@ export class Froso {
         }
     }
 
-    protected listen() {
+    protected listen(): Server {
         return this.express.listen(this.config.port);
     }
 

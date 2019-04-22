@@ -1,5 +1,6 @@
 export interface IModelData {
-    id: number;
+    _id: number;
+    created: number;
 }
 
 export interface IModelConstructor<T extends Model, D extends IModelData> {
