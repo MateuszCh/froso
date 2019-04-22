@@ -10,7 +10,7 @@ export interface IPostTypeData extends IModelData {
 }
 
 export class PostType extends Model {
-    public static readonly type = 'post_type';
+    public static readonly type = 'post type';
 
     constructor(protected data: IPostTypeData) {
         super(data);

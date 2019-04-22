@@ -1,6 +1,8 @@
+import { ObjectID } from 'mongodb';
 export interface IModelData {
-    _id: number;
-    created: number;
+    _id?: ObjectID;
+    created?: number;
+    id: number;
 }
 
 export interface IModelConstructor<T extends Model, D extends IModelData> {

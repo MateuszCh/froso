@@ -22,9 +22,9 @@ export class Froso {
     protected config!: IFrosoConfig;
     protected resources: IResources<any> = {};
     protected resourceTypes: Array<IResourceType<any>> = [
-        { id: 'files' },
-        { id: 'post_types' },
-        { id: 'posts' },
+        { id: 'files', indexes: [{ key: { id: 1 }, unique: true }] },
+        { id: 'post_types', indexes: [{ key: { id: 1 }, unique: true }] },
+        { id: 'posts', indexes: [{ key: { id: 1 }, unique: true }] },
         { id: 'counters', indexes: [{ key: { type: 1 }, unique: true }] },
     ];
 

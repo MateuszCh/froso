@@ -1,6 +1,4 @@
-import { IModelData, Model } from './model';
-
-export interface IFieldData extends IModelData {
+export interface IFieldData {
     title: string;
     type: string;
     id: string;
@@ -9,10 +7,6 @@ export interface IFieldData extends IModelData {
     repeaterFields?: IFieldData[];
 }
 
-export class Field extends Model {
-    public static readonly type = 'field';
-
-    constructor(protected data: IFieldData) {
-        super(data);
-    }
+export class Field {
+    constructor(protected data: IFieldData) {}
 }

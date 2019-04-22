@@ -1,4 +1,13 @@
-import { Collection, Db, FilterQuery, IndexSpecification, ObjectID } from 'mongodb';
+import {
+    Collection,
+    Db,
+    DeleteWriteOpResultObject,
+    FilterQuery,
+    IndexSpecification,
+    InsertOneWriteOpResult,
+    ObjectID,
+    ReplaceWriteOpResult,
+} from 'mongodb';
 import { IModelData } from '../models/model';
 
 export interface IResources<T extends IModelData> {
@@ -19,9 +28,7 @@ export type IResourceServiceContructor<T extends IModelData> = new (
 
 export class ResourceService<T extends IModelData> {
     constructor(protected collectionName: string, protected db: Db, protected indexes?: IndexSpecification[]) {
-        if (this.indexes && this.indexes.length) {
-            this.collection.createIndexes(this.indexes);
-        }
+        this.initIndexes();
     }
 
     public find(query: FilterQuery<T> = {}): Promise<T[]> {
@@ -29,8 +36,37 @@ export class ResourceService<T extends IModelData> {
     }
 
     public findById(id: string): Promise<T | null> {
-        const objectId = new ObjectID(id);
-        return this.collection.findOne({ _id: objectId });
+        const _id = this.getObjectId(id);
+        return this.collection.findOne({ _id });
+    }
+
+    public deleteById(id: string): Promise<DeleteWriteOpResultObject> {
+        const _id = this.getObjectId(id);
+        return this.collection.deleteOne({ _id });
+    }
+
+    public updateById(id: string, data: T): Promise<ReplaceWriteOpResult> {
+        const _id = this.getObjectId(id);
+        return this.collection.replaceOne({ _id }, data);
+    }
+
+    public create(data: T): Promise<InsertOneWriteOpResult> {
+        return this.collection.insertOne(data);
+    }
+
+    protected initIndexes = async (): Promise<void> => {
+        if (this.indexes && this.indexes.length) {
+            try {
+                await this.collection.dropIndexes();
+                await this.collection.createIndexes(this.indexes);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    };
+
+    protected getObjectId(id: string): ObjectID {
+        return new ObjectID(id);
     }
 
     protected get collection(): Collection {
