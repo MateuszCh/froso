@@ -2,9 +2,13 @@ import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { Server } from 'http';
 import { Db, MongoClient, MongoClientOptions } from 'mongodb';
+import * as morgan from 'morgan';
+import { Logger } from 'winston';
 
 import { forEach } from 'lodash';
 
+import { errorRequestHandler } from './errors';
+import logger from './logger';
 import { ICounterData, IFileData, IModelData, IPostData, IPostTypeData } from './models';
 import router from './routers';
 import { IResources, IResourceType, ResourceService } from './services';
@@ -17,6 +21,7 @@ export interface IFrosoConfig {
 }
 
 export class Froso {
+    public logger: Logger = logger;
     protected express: express.Application = express();
     protected db!: Db;
     protected config!: IFrosoConfig;
@@ -63,10 +68,28 @@ export class Froso {
         this.express.use(bodyParser.json({ limit: '1mb' }));
         this.express.use(bodyParser.urlencoded({ extended: false, limit: '1mb' }));
 
+        this.express.use(
+            morgan('combined', {
+                skip: (req: express.Request, res: express.Response) => res.statusCode >= 400,
+                stream: { write: (message: string) => this.logger.info(message) },
+            }),
+        );
+
+        this.express.use(
+            morgan('combined', {
+                skip: (req: express.Request, res: express.Response) => res.statusCode < 400,
+                stream: { write: (message: string) => this.logger.error(message) },
+            }),
+        );
+
         forEach(this.customRouters, (customRouter: express.Router) => this.express.use(customRouter));
 
         this.express.use('/api', router);
-        this.express.get('*', (req: express.Request, res: express.Response) => res.send('<h1>Froso</h1>'));
+        this.express.get(['*'], (req: express.Request, res: express.Response) =>
+            res.send('<h1 style="color: steelblue">Froso</h1>'),
+        );
+
+        errorRequestHandler(this.express);
 
         try {
             const client: MongoClient = await this.connectMongo();
