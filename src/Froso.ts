@@ -1,14 +1,11 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { Server } from 'http';
+import { forEach } from 'lodash';
 import { Db, MongoClient, MongoClientOptions } from 'mongodb';
-import * as morgan from 'morgan';
 import { Logger } from 'winston';
 
-import { forEach } from 'lodash';
-
-import { errorRequestHandler } from './errors';
-import logger from './logger';
+import { errorRequestHandler, getLogger, initMorgan } from './app-config';
 import { ICounterData, IFileData, IModelData, IPostData, IPostTypeData } from './models';
 import router from './routers';
 import { IResources, IResourceType, ResourceService } from './services';
@@ -18,10 +15,11 @@ export interface IFrosoConfig {
     mongoDb: string;
     mongoOptions?: MongoClientOptions;
     port: number;
+    logsDirectory?: string;
 }
 
 export class Froso {
-    public logger: Logger = logger;
+    public logger!: Logger;
     protected express: express.Application = express();
     protected db!: Db;
     protected config!: IFrosoConfig;
@@ -65,22 +63,10 @@ export class Froso {
 
     public async init(config: IFrosoConfig): Promise<Server | undefined> {
         this.config = config;
+        this.logger = getLogger(this.config.logsDirectory);
+        initMorgan(this.express, this.logger);
         this.express.use(bodyParser.json({ limit: '1mb' }));
         this.express.use(bodyParser.urlencoded({ extended: false, limit: '1mb' }));
-
-        this.express.use(
-            morgan('combined', {
-                skip: (req: express.Request, res: express.Response) => res.statusCode >= 400,
-                stream: { write: (message: string) => this.logger.info(message) },
-            }),
-        );
-
-        this.express.use(
-            morgan('combined', {
-                skip: (req: express.Request, res: express.Response) => res.statusCode < 400,
-                stream: { write: (message: string) => this.logger.error(message) },
-            }),
-        );
 
         forEach(this.customRouters, (customRouter: express.Router) => this.express.use(customRouter));
 
