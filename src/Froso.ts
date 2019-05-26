@@ -2,13 +2,12 @@ import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { Server } from 'http';
 import { forEach } from 'lodash';
-import { Db, MongoClient, MongoClientOptions } from 'mongodb';
+import { MongoClientOptions } from 'mongodb';
 import { Logger } from 'winston';
 
-import { errorRequestHandler, getLogger, initMorgan } from './app-config';
-import { ICounterData, IFileData, IModelData, IPostData, IPostTypeData } from './models';
+import { connectMongo, getLogger, initMorgan } from './config';
 import router from './routers';
-import { IResources, IResourceType, ResourceService } from './services';
+import { errorRequestHandler } from './utils';
 
 export interface IFrosoConfig {
     mongoURI: string;
@@ -21,48 +20,16 @@ export interface IFrosoConfig {
 export class Froso {
     public logger!: Logger;
     protected express: express.Application = express();
-    protected db!: Db;
-    protected config!: IFrosoConfig;
-    protected resources: IResources<any> = {};
-    protected resourceTypes: Array<IResourceType<any>> = [
-        { id: 'files', indexes: [{ key: { id: 1 }, unique: true }] },
-        { id: 'post_types', indexes: [{ key: { id: 1 }, unique: true }] },
-        { id: 'posts', indexes: [{ key: { id: 1 }, unique: true }] },
-        { id: 'counters', indexes: [{ key: { type: 1 }, unique: true }] },
-    ];
 
     protected customRouters: express.Router[] = [];
+
+    constructor(protected config: IFrosoConfig) {}
 
     public addRouter(customRouter: express.Router): void {
         this.customRouters.push(customRouter);
     }
 
-    public addResourceType<T extends IModelData>(resourceType: IResourceType<T>): void {
-        this.resourceTypes.push(resourceType);
-    }
-
-    public getResource<T extends IModelData>(id: string): ResourceService<T> {
-        return this.resources[id];
-    }
-
-    public get posts(): ResourceService<IPostData> {
-        return this.resources.posts;
-    }
-
-    public get files(): ResourceService<IFileData> {
-        return this.resources.files;
-    }
-
-    public get postTypes(): ResourceService<IPostTypeData> {
-        return this.resources.postTypes;
-    }
-
-    public get counters(): ResourceService<ICounterData> {
-        return this.resources.counters;
-    }
-
-    public async init(config: IFrosoConfig): Promise<Server | undefined> {
-        this.config = config;
+    public async init(): Promise<Server | undefined> {
         this.logger = getLogger(this.config.logsDirectory);
         initMorgan(this.express, this.logger);
         this.express.use(bodyParser.json({ limit: '1mb' }));
@@ -72,20 +39,13 @@ export class Froso {
 
         this.express.use('/api', router);
         this.express.get(['*'], (req: express.Request, res: express.Response) =>
-            res.send('<h1 style="color: steelblue">Froso</h1>'),
+            res.send('<h1 style="color: steelblue">Froso</h1>')
         );
 
         errorRequestHandler(this.express);
 
         try {
-            const client: MongoClient = await this.connectMongo();
-            this.db = client.db(this.config.mongoDb);
-
-            forEach(this.resourceTypes, (type: IResourceType<any>) => {
-                this.resources[type.id] = type.resourceService
-                    ? new type.resourceService(type.id, this.db, type.indexes)
-                    : new ResourceService(type.id, this.db, type.indexes);
-            });
+            await connectMongo(this.config.mongoURI, this.config.mongoDb, this.config.mongoOptions);
 
             return this.listen();
         } catch (e) {
@@ -97,12 +57,4 @@ export class Froso {
     protected listen(): Server {
         return this.express.listen(this.config.port);
     }
-
-    protected connectMongo(): Promise<MongoClient> {
-        return MongoClient.connect(this.config.mongoURI, this.config.mongoOptions);
-    }
 }
-
-const froso = new Froso();
-
-export default froso;

@@ -1,7 +1,6 @@
-import { File, IFileData, IModelConstructor } from '../models';
+import { File, IFileData } from '../resources';
 import { AbstractController } from './abstract.controller';
 
-export class FilesController extends AbstractController<File, IFileData> {
-    public modelConstructor: IModelConstructor<File, IFileData> = File;
-    protected readonly resourceType: string = 'files';
+export class FilesController extends AbstractController<IFileData> {
+    public resource = new File();
 }

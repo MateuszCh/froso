@@ -1,7 +1,6 @@
-import { IModelConstructor, IPostData, Post } from '../models';
+import { IPostData, Post } from '../resources';
 import { AbstractController } from './abstract.controller';
 
-export class PostsController extends AbstractController<Post, IPostData> {
-    public modelConstructor: IModelConstructor<Post, IPostData> = Post;
-    protected readonly resourceType: string = 'posts';
+export class PostsController extends AbstractController<IPostData> {
+    public resource = new Post();
 }

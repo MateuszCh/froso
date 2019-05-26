@@ -1,8 +1,8 @@
 import { PostsController } from '../controllers';
-import { IPostData, Post } from '../models';
+import { IPostData } from '../resources';
 import { AbstractRouter } from './abstract.router';
 
-export class PostsRouter extends AbstractRouter<Post, IPostData> {
+export class PostsRouter extends AbstractRouter<IPostData> {
     protected controller = new PostsController();
 }
 
