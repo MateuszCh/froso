@@ -1,5 +1,4 @@
 import { Application, NextFunction, Request, Response } from 'express';
-
 import { isString } from 'lodash';
 
 export function errorRequestHandler(app: Application) {

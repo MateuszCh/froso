@@ -11,5 +11,4 @@ export interface IPageData extends IResourceData {
 export class Page extends Resource<IPageData> {
     public readonly type = 'page';
     public readonly collectionName = 'pages';
-    public readonly validators = [];
 }

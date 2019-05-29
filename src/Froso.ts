@@ -1,11 +1,11 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { Server } from 'http';
-import { forEach } from 'lodash';
-import { MongoClientOptions } from 'mongodb';
+import { find, forEach } from 'lodash';
+import { IndexSpecification, MongoClientOptions } from 'mongodb';
 import { Logger } from 'winston';
 
-import { connectMongo, getLogger, initMorgan } from './config';
+import { defaultCollections, frosoMongo, getLogger, initMorgan } from './config';
 import router from './routers';
 import { errorRequestHandler } from './utils';
 
@@ -13,8 +13,14 @@ export interface IFrosoConfig {
     mongoURI: string;
     mongoDb: string;
     mongoOptions?: MongoClientOptions;
+    mongoCollections?: IFrosoCollectionConfig[];
     port: number;
     logsDirectory?: string;
+}
+
+export interface IFrosoCollectionConfig {
+    collectionName: string;
+    indexes?: IndexSpecification[];
 }
 
 export class Froso {
@@ -29,29 +35,49 @@ export class Froso {
         this.customRouters.push(customRouter);
     }
 
-    public async init(): Promise<Server | undefined> {
-        this.logger = getLogger(this.config.logsDirectory);
-        initMorgan(this.express, this.logger);
-        this.express.use(bodyParser.json({ limit: '1mb' }));
-        this.express.use(bodyParser.urlencoded({ extended: false, limit: '1mb' }));
+    protected get mongoCollections(): IFrosoCollectionConfig[] {
+        const configCollections: IFrosoCollectionConfig[] = this.config.mongoCollections || [];
 
-        forEach(this.customRouters, (customRouter: express.Router) => this.express.use(customRouter));
-
-        this.express.use('/api', router);
-        this.express.get(['*'], (req: express.Request, res: express.Response) =>
-            res.send('<h1 style="color: steelblue">Froso</h1>')
+        const validDefaultCollections = defaultCollections.filter(
+            defaultCollection =>
+                !find(
+                    configCollections,
+                    configCollection => configCollection.collectionName === defaultCollection.collectionName
+                )
         );
 
-        errorRequestHandler(this.express);
+        return configCollections.concat(validDefaultCollections);
+    }
 
-        try {
-            await connectMongo(this.config.mongoURI, this.config.mongoDb, this.config.mongoOptions);
+    public async init(): Promise<Server> {
+        return new Promise(resolve => {
+            frosoMongo
+                .connectMongo(this.config.mongoURI, this.config.mongoDb, this.config.mongoOptions)
+                .then(() => {
+                    forEach(this.mongoCollections, frosoMongo.initCollection);
 
-            return this.listen();
-        } catch (e) {
-            console.log(e);
-            return undefined;
-        }
+                    this.logger = getLogger(this.config.logsDirectory);
+                    initMorgan(this.express, this.logger);
+                    this.express.use(bodyParser.json({ limit: '1mb' }));
+                    this.express.use(bodyParser.urlencoded({ extended: false, limit: '1mb' }));
+
+                    forEach(this.customRouters, (customRouter: express.Router) => this.express.use(customRouter));
+
+                    this.express.use('/api', router);
+                    this.express.get(['*'], (req: express.Request, res: express.Response) =>
+                        res.send('<h1 style="color: steelblue">Froso</h1>')
+                    );
+
+                    errorRequestHandler(this.express);
+                    resolve(this.listen());
+                })
+                .catch(() => {
+                    this.express.get(['*'], (req: express.Request, res: express.Response) => {
+                        res.status(500).send('<h1>Database error</h1>');
+                    });
+                    resolve(this.listen());
+                });
+        });
     }
 
     protected listen(): Server {

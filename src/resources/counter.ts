@@ -8,5 +8,4 @@ export interface ICounterData extends IResourceData {
 export class Counter extends Resource<ICounterData> {
     public readonly type = 'counter';
     public readonly collectionName = 'counters';
-    public readonly validators = [];
 }

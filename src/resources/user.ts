@@ -8,5 +8,4 @@ export interface IUserData extends IResourceData {
 export class User extends Resource<IUserData> {
     public readonly type = 'user';
     public readonly collectionName = 'users';
-    public readonly validators = [];
 }

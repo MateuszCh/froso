@@ -13,8 +13,7 @@ export interface IFileData extends IResourceData {
     position?: number;
 }
 
-export class File extends Resource<IFileData> {
+export class FrosoFile extends Resource<IFileData> {
     public readonly type = 'file';
     public readonly collectionName = 'files';
-    public readonly validators = [];
 }

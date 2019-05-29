@@ -1,5 +1,13 @@
-import { IFieldData } from './field';
 import { IResourceData, Resource } from './resource';
+
+export interface IFieldData {
+    title: string;
+    type: string;
+    id: string;
+    selectOptions?: string;
+    multiselectOptions?: string;
+    repeaterFields?: IFieldData[];
+}
 
 export interface IPostTypeData extends IResourceData {
     title: string;
@@ -12,5 +20,4 @@ export interface IPostTypeData extends IResourceData {
 export class PostType extends Resource<IPostTypeData> {
     public readonly type = 'post_type';
     public readonly collectionName = 'post_types';
-    public readonly validators = [];
 }

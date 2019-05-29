@@ -11,5 +11,4 @@ export interface IPostData extends IResourceData {
 export class Post extends Resource<IPostData> {
     public readonly type = 'post';
     public readonly collectionName = 'posts';
-    public readonly validators = [];
 }

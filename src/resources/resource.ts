@@ -1,19 +1,15 @@
 import { ValidationChainBuilder } from 'express-validator/check';
 import {
     Collection,
+    Db,
     DeleteWriteOpResultObject,
     FilterQuery,
-    IndexSpecification,
     InsertOneWriteOpResult,
     ObjectID,
     ReplaceWriteOpResult
 } from 'mongodb';
-import { getDb } from '../config';
 
-export interface IResourceCollection {
-    collectionName: string;
-    indexes: IndexSpecification[];
-}
+import { frosoMongo } from '../config';
 
 export interface IResourceData {
     _id?: ObjectID;
@@ -27,10 +23,14 @@ export abstract class Resource<T extends IResourceData> {
 
     public abstract readonly collectionName: string;
 
-    public abstract readonly validators: ValidationChainBuilder[] = [];
+    public readonly validators: ValidationChainBuilder[] = [];
 
     public get collection(): Collection {
-        return getDb().collection(this.collectionName);
+        return this.db.collection(this.collectionName);
+    }
+
+    public get db(): Db {
+        return frosoMongo.db;
     }
 
     public find(query: FilterQuery<T> = {}): Promise<T[]> {
