@@ -1,7 +1,10 @@
 import { forEach } from 'lodash';
-import { Db, MongoClient, MongoClientOptions } from 'mongodb';
+import { Db, IndexSpecification, MongoClient, MongoClientOptions } from 'mongodb';
 
-import { IFrosoCollectionConfig } from '../Froso';
+export interface IFrosoCollectionConfig {
+    collectionName: string;
+    indexes?: IndexSpecification[];
+}
 
 export type OnConnectMongo = (db: Db) => void;
 

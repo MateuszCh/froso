@@ -1,4 +1,4 @@
-import { IFrosoCollectionConfig } from '../Froso';
+import { IFrosoCollectionConfig } from './mongo';
 
 export const defaultCollections: IFrosoCollectionConfig[] = [
     {

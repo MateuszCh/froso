@@ -3,8 +3,8 @@ import * as path from 'path';
 import { createLogger, Logger } from 'winston';
 import * as DailyRotateFile from 'winston-daily-rotate-file';
 
-export function getLogger(logsDirectory?: string): Logger {
-    const mainDirectory = logsDirectory || path.resolve(__dirname, '../../', 'logs');
+export function getWinston(directory?: string): Logger {
+    const mainDirectory = directory || path.resolve(__dirname, '../../', 'logs');
 
     const errorDirectory = path.resolve(mainDirectory, 'error');
     const infoDirectory = path.resolve(mainDirectory, 'info');
@@ -25,7 +25,7 @@ export function getLogger(logsDirectory?: string): Logger {
         dirname: errorDirectory,
         filename: '%DATE%-error.log',
         level: 'error',
-        maxFiles: '30d',
+        maxFiles: '30d'
     });
 
     const infoTransport = new DailyRotateFile({
@@ -33,7 +33,7 @@ export function getLogger(logsDirectory?: string): Logger {
         dirname: infoDirectory,
         filename: '%DATE%-info.log',
         level: 'info',
-        maxFiles: '30d',
+        maxFiles: '30d'
     });
 
     return createLogger({ transports: [errorTransport, infoTransport] });

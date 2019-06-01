@@ -6,14 +6,14 @@ export function initMorgan(express: Application, logger: Logger): void {
     express.use(
         morgan('combined', {
             skip: (req: Request, res: Response) => res.statusCode >= 400,
-            stream: { write: (message: string) => logger.info(message) },
-        }),
+            stream: { write: (message: string) => logger.info(message) }
+        })
     );
 
     express.use(
         morgan('combined', {
             skip: (req: Request, res: Response) => res.statusCode < 400,
-            stream: { write: (message: string) => logger.error(message) },
-        }),
+            stream: { write: (message: string) => logger.error(message) }
+        })
     );
 }
