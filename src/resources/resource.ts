@@ -14,8 +14,8 @@ import { frosoMongo } from '../config';
 export interface IResourceData {
     _id?: ObjectID;
     created?: number;
-    id: number;
-    type: string;
+    id?: number;
+    type?: string;
 }
 
 export abstract class Resource<T extends IResourceData> {
@@ -34,25 +34,27 @@ export abstract class Resource<T extends IResourceData> {
     }
 
     public find(query: FilterQuery<T> = {}): Promise<T[]> {
-        return this.collection.find(query).toArray();
+        return this.collection
+            .find(query)
+            .project({ _id: 0 })
+            .toArray();
     }
 
-    public findById(id: string): Promise<T | null> {
-        const _id = this.getObjectId(id);
-        return this.collection.findOne({ _id });
+    public findById(id: number): Promise<T | null> {
+        return this.collection.findOne({ id }, { projection: { _id: 0 } });
     }
 
-    public deleteById(id: string): Promise<DeleteWriteOpResultObject> {
-        const _id = this.getObjectId(id);
-        return this.collection.deleteOne({ _id });
+    public deleteById(id: number): Promise<DeleteWriteOpResultObject> {
+        return this.collection.deleteOne({ id });
     }
 
-    public updateById(id: string, data: T): Promise<ReplaceWriteOpResult> {
-        const _id = this.getObjectId(id);
-        return this.collection.replaceOne({ _id }, data);
+    public updateById(id: number, data: T): Promise<ReplaceWriteOpResult> {
+        return this.collection.replaceOne({ id }, data);
     }
 
     public create(data: T): Promise<InsertOneWriteOpResult> {
+        data.created = Date.now();
+        data.type = this.type;
         return this.collection.insertOne(data);
     }
 

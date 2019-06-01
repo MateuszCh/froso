@@ -1,8 +1,11 @@
 import { forEach } from 'lodash';
 import { Db, IndexSpecification, MongoClient, MongoClientOptions } from 'mongodb';
 
+import { Counter } from '../resources';
+
 export interface IFrosoCollectionConfig {
     collectionName: string;
+    counter?: boolean;
     indexes?: IndexSpecification[];
 }
 
@@ -10,6 +13,8 @@ export type OnConnectMongo = (db: Db) => void;
 
 export class Mongo {
     public db!: Db;
+
+    public counter = new Counter();
 
     private connectListeners: OnConnectMongo[] = [];
 
@@ -33,8 +38,16 @@ export class Mongo {
 
     public initCollection = async (collectionConfig: IFrosoCollectionConfig) => {
         try {
-            const collection = await this.db.createCollection(collectionConfig.collectionName);
+            const collectionName = collectionConfig.collectionName;
+            const collection = await this.db.createCollection(collectionName);
             await collection.dropIndexes();
+            if (collectionConfig.counter) {
+                const counter = await this.counter.findByCollectionName(collectionName);
+                if (!counter) {
+                    await this.counter.create({ collectionName, counter: 1 });
+                }
+            }
+
             if (collectionConfig.indexes) {
                 collection.createIndexes(collectionConfig.indexes);
             }

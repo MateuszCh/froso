@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { capitalize } from 'lodash';
 
-import { IResourceData, Resource } from '../resources';
+import { Counter, IResourceData, Resource } from '../resources';
 
 export abstract class AbstractController<T extends IResourceData> {
     public abstract resource: Resource<T>;
+
+    public counter = new Counter();
 
     public getAll = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
         const modelsData: T[] = await this.resource.find();
@@ -37,17 +39,23 @@ export abstract class AbstractController<T extends IResourceData> {
         const data = req.body;
         const updateResult = await this.resource.updateById(id, data);
         if (updateResult.result.ok && updateResult.result.ok === 1) {
-            return res.status(200).send(`${capitalize(this.resource.type)} with id: ${id} was successfully updated.`);
+            return res.status(200).send(updateResult.ops[0]);
         } else {
             return res.status(500).send(`There was an error updating ${this.resource.type} with id: ${id}`);
         }
     };
 
     public create = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
-        const body = req.body;
+        const body: T = req.body;
+        const collectionName = this.resource.collectionName;
+        const counter = await this.counter.findByCollectionName(collectionName);
+        if (counter) {
+            body.id = counter.counter;
+            await this.counter.incrementCounter(collectionName);
+        }
         const createResult = await this.resource.create(body);
         if (createResult.result.ok && createResult.result.ok === 1) {
-            return res.status(200).send(`${capitalize(this.resource.type)} was successfully created.`);
+            return res.status(200).send(createResult.ops[0]);
         } else {
             return res.status(500).send(`${capitalize(this.resource.type)} was not created.`);
         }
