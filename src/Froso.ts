@@ -47,6 +47,9 @@ export class Froso {
                     this.express.get(['*'], (req: express.Request, res: express.Response) =>
                         res.send('<h1 style="color: steelblue">Froso</h1>')
                     );
+                    this.express.use(['*'], (req: express.Request, res: express.Response) =>
+                        res.status(404).send(`${req.method}: ${req.params[0]} not found`)
+                    );
 
                     errorRequestHandler(this.express);
                     resolve(this.listen());

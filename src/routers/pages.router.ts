@@ -1,8 +1,8 @@
 import { PagesController } from '../controllers';
-import { IPageData } from '../resources';
+import { IPageData, IPageRequestData } from '../resources';
 import { AbstractRouter } from './abstract.router';
 
-export class PagesRouter extends AbstractRouter<IPageData> {
+export class PagesRouter extends AbstractRouter<IPageData, IPageRequestData> {
     protected controller = new PagesController();
 }
 

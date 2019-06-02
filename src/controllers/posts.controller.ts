@@ -1,6 +1,6 @@
-import { IPostData, Post } from '../resources';
+import { IPostData, IPostRequestData, Post } from '../resources';
 import { AbstractController } from './abstract.controller';
 
-export class PostsController extends AbstractController<IPostData> {
+export class PostsController extends AbstractController<IPostData, IPostRequestData> {
     public resource = new Post();
 }

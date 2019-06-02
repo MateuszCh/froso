@@ -44,7 +44,7 @@ export class Mongo {
             if (collectionConfig.counter) {
                 const counter = await this.counter.findByCollectionName(collectionName);
                 if (!counter) {
-                    await this.counter.create({ collectionName, counter: 1 });
+                    await this.counter.create({ collectionName });
                 }
             }
 

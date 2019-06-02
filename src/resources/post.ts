@@ -1,14 +1,22 @@
-import { IResourceData, Resource } from './resource';
+import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IPostData extends IResourceData {
     title: string;
-    type: string;
+    postType: string;
     data: {
         [key: string]: any;
     };
 }
 
-export class Post extends Resource<IPostData> {
+export interface IPostRequestData extends IResourceRequestData {
+    title?: string;
+    postType?: string;
+    data?: {
+        [key: string]: any;
+    };
+}
+
+export class Post extends Resource<IPostData, IPostRequestData> {
     public readonly type = 'post';
     public readonly collectionName = 'posts';
 }

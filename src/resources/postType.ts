@@ -1,4 +1,4 @@
-import { IResourceData, Resource } from './resource';
+import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IFieldData {
     title: string;
@@ -12,12 +12,20 @@ export interface IFieldData {
 export interface IPostTypeData extends IResourceData {
     title: string;
     pluralTitle: string;
-    type: string;
+    postType: string;
     fields: IFieldData[];
     isComponent: boolean;
 }
 
-export class PostType extends Resource<IPostTypeData> {
+export interface IPostTypeRequestData extends IResourceRequestData {
+    title?: string;
+    pluralTitle?: string;
+    postType?: string;
+    fields?: IFieldData[];
+    isComponent?: boolean;
+}
+
+export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public readonly type = 'post_type';
     public readonly collectionName = 'post_types';
 }

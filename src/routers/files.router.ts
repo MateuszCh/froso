@@ -1,8 +1,8 @@
 import { FilesController } from '../controllers';
-import { IFileData } from '../resources';
+import { IFileData, IFileRequestData } from '../resources';
 import { AbstractRouter } from './abstract.router';
 
-export class FilesRouter extends AbstractRouter<IFileData> {
+export class FilesRouter extends AbstractRouter<IFileData, IFileRequestData> {
     protected controller = new FilesController();
 }
 

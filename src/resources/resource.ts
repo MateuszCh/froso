@@ -1,24 +1,19 @@
 import { ValidationChainBuilder } from 'express-validator/check';
-import {
-    Collection,
-    Db,
-    DeleteWriteOpResultObject,
-    FilterQuery,
-    InsertOneWriteOpResult,
-    ObjectID,
-    ReplaceWriteOpResult
-} from 'mongodb';
+import { Collection, Db, FilterQuery, FindAndModifyWriteOpResultObject, InsertOneWriteOpResult } from 'mongodb';
 
 import { frosoMongo } from '../config';
 
 export interface IResourceData {
-    _id?: ObjectID;
     created?: number;
     id?: number;
     type?: string;
 }
 
-export abstract class Resource<T extends IResourceData> {
+export interface IResourceRequestData {
+    id?: number;
+}
+
+export abstract class Resource<T extends IResourceData, D extends IResourceRequestData> {
     public abstract readonly type: string;
 
     public abstract readonly collectionName: string;
@@ -44,21 +39,20 @@ export abstract class Resource<T extends IResourceData> {
         return this.collection.findOne({ id }, { projection: { _id: 0 } });
     }
 
-    public deleteById(id: number): Promise<DeleteWriteOpResultObject> {
-        return this.collection.deleteOne({ id });
+    public deleteById(id: number): Promise<FindAndModifyWriteOpResultObject<T>> {
+        return this.collection.findOneAndDelete({ id }, { projection: { _id: 0 } });
     }
 
-    public updateById(id: number, data: T): Promise<ReplaceWriteOpResult> {
-        return this.collection.replaceOne({ id }, data);
+    public updateById(id: number, data: D): Promise<FindAndModifyWriteOpResultObject<T>> {
+        return this.collection.findOneAndUpdate(
+            { id },
+            { $set: data },
+            { projection: { _id: 0 }, returnOriginal: false }
+        );
     }
 
-    public create(data: T): Promise<InsertOneWriteOpResult> {
-        data.created = Date.now();
-        data.type = this.type;
+    public create(requestData: D): Promise<InsertOneWriteOpResult> {
+        const data: IResourceData = { ...requestData, created: Date.now(), type: this.type };
         return this.collection.insertOne(data);
-    }
-
-    protected getObjectId(id: string): ObjectID {
-        return new ObjectID(id);
     }
 }
