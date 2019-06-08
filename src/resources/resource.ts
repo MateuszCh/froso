@@ -1,4 +1,4 @@
-import { ValidationChainBuilder } from 'express-validator/check';
+import { ValidationChain } from 'express-validator/check';
 import { Collection, Db, FilterQuery, FindAndModifyWriteOpResultObject, InsertOneWriteOpResult } from 'mongodb';
 
 import { frosoMongo } from '../config';
@@ -18,7 +18,9 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
 
     public abstract readonly collectionName: string;
 
-    public readonly validators: ValidationChainBuilder[] = [];
+    public readonly createValidators: ValidationChain[] = [];
+
+    public readonly updateValidators: ValidationChain[] = [];
 
     public get collection(): Collection {
         return this.db.collection(this.collectionName);

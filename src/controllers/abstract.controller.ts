@@ -17,7 +17,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
         const id = parseInt(req.params.id, 10);
         const modelData: T | null = await this.resource.findById(id);
         if (!modelData) {
-            return res.send(`There is no ${this.resource.type} with ${id} id`);
+            return res.status(404).send(`There is no ${this.resource.type} with ${id} id`);
         } else {
             return res.send(modelData);
         }
