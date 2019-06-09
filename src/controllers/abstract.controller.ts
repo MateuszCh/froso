@@ -13,17 +13,17 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
         return res.send(modelsData);
     };
 
-    public getById = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+    public getById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
         const id = parseInt(req.params.id, 10);
         const modelData: T | null = await this.resource.findById(id);
         if (!modelData) {
-            return res.status(404).send(`There is no ${this.resource.type} with ${id} id`);
+            return next(`There is no ${this.resource.type} with ${id} id`);
         } else {
             return res.send(modelData);
         }
     };
 
-    public removeById = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+    public removeById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
         const id = parseInt(req.params.id, 10);
         const deleteResult = await this.resource.deleteById(id);
 
@@ -33,11 +33,11 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
             }
             return res.status(404).send(`There is no ${this.resource.type} widh id: ${id}`);
         } else {
-            return res.status(500).send(`There was an error deleting ${this.resource.type} with id: ${id}`);
+            return next(`There was an error deleting ${this.resource.type} with id: ${id}`);
         }
     };
 
-    public updateById = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+    public updateById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
         const id = parseInt(req.params.id, 10);
         const data = req.body;
         const updateResult = await this.resource.updateById(id, data);
@@ -47,11 +47,11 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
             }
             return res.status(404).send(`There is no ${this.resource.type} widh id: ${id}`);
         } else {
-            return res.status(500).send(`There was an error updating ${this.resource.type} with id: ${id}`);
+            return next(`There was an error updating ${this.resource.type} with id: ${id}`);
         }
     };
 
-    public create = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+    public create = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
         const data: D = req.body;
         const collectionName = this.resource.collectionName;
         const counter = await this.counter.findByCollectionName(collectionName);
@@ -62,9 +62,11 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
         }
         const createResult = await this.resource.create(data);
         if (createResult.result.ok && createResult.result.ok === 1) {
-            return res.status(200).send(createResult.ops[0]);
+            const resultData = createResult.ops[0];
+            delete resultData._id;
+            return res.status(200).send(resultData);
         } else {
-            return res.status(500).send(`${capitalize(this.resource.type)} was not created.`);
+            return next(`${capitalize(this.resource.type)} was not created.`);
         }
     };
 }
