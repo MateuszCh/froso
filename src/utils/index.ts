@@ -1,4 +1,4 @@
-export * from './async-middleware';
-export * from './error-request-handler';
-export * from './validation-middleware';
+export * from './middlewares';
+export * from './error.handler';
 export * from './validators';
+export * from './sanitizers';

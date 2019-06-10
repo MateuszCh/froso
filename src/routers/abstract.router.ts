@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { AbstractController } from '../controllers';
 import { IResourceData, IResourceRequestData } from '../resources';
-import { asyncMiddleware, validationMiddleware } from '../utils';
+import { asyncMiddleware, toIdSanitizer, validationMiddleware } from '../utils';
 
 export abstract class AbstractRouter<T extends IResourceData, D extends IResourceRequestData> {
     protected router: Router = Router();
@@ -11,8 +11,8 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
 
     public getRouter(): Router {
         this.router.get('', asyncMiddleware(this.controller.getAll));
-        this.router.get('/:id', asyncMiddleware(this.controller.getById));
-        this.router.delete('/:id', asyncMiddleware(this.controller.removeById));
+        this.router.get('/:id', toIdSanitizer, asyncMiddleware(this.controller.getById));
+        this.router.delete('/:id', toIdSanitizer, asyncMiddleware(this.controller.removeById));
         this.router.post(
             '',
             this.controller.resource.createValidators,
@@ -23,6 +23,7 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
             '/:id',
             this.controller.resource.updateValidators,
             validationMiddleware,
+            toIdSanitizer,
             asyncMiddleware(this.controller.updateById)
         );
         return this.router;

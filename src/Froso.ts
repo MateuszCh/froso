@@ -7,7 +7,7 @@ import { Logger } from 'winston';
 
 import { defaultCollections, frosoMongo, getWinston, IFrosoCollectionConfig, initMorgan } from './config';
 import router from './routers';
-import { errorRequestHandler } from './utils';
+import { errorHandler } from './utils';
 
 export interface IFrosoConfig {
     mongoURI: string;
@@ -51,7 +51,7 @@ export class Froso {
                         res.status(404).send(`${req.method}: ${req.params[0]} not found`)
                     );
 
-                    errorRequestHandler(this.express);
+                    errorHandler(this.express);
                     resolve(this.listen());
                 })
                 .catch(() => {

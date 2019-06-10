@@ -19,4 +19,5 @@ export interface IPageRequestData extends IResourceRequestData {
 export class Page extends Resource<IPageData, IPageRequestData> {
     public readonly type = 'page';
     public readonly collectionName = 'pages';
+    public requiredFields = ['url', 'title'];
 }

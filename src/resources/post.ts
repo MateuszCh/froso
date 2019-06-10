@@ -19,4 +19,5 @@ export interface IPostRequestData extends IResourceRequestData {
 export class Post extends Resource<IPostData, IPostRequestData> {
     public readonly type = 'post';
     public readonly collectionName = 'posts';
+    public requiredFields = ['title', 'postType'];
 }

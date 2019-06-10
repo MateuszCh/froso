@@ -14,7 +14,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
     };
 
     public getById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-        const id = parseInt(req.params.id, 10);
+        const id: number = req.params.id;
         const modelData: T | null = await this.resource.findById(id);
         if (!modelData) {
             return next(`There is no ${this.resource.type} with ${id} id`);
@@ -24,7 +24,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
     };
 
     public removeById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-        const id = parseInt(req.params.id, 10);
+        const id: number = req.params.id;
         const deleteResult = await this.resource.deleteById(id);
 
         if (deleteResult.ok && deleteResult.ok === 1) {
@@ -38,7 +38,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
     };
 
     public updateById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-        const id = parseInt(req.params.id, 10);
+        const id: number = req.params.id;
         const data = req.body;
         const updateResult = await this.resource.updateById(id, data);
         if (updateResult.ok && updateResult.ok === 1) {
