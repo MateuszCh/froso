@@ -51,7 +51,8 @@ export class Froso {
                         res.status(404).send(`${req.method}: ${req.params[0]} not found`)
                     );
 
-                    errorHandler(this.express);
+                    this.express.use(errorHandler());
+
                     resolve(this.listen());
                 })
                 .catch(() => {

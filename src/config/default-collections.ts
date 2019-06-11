@@ -7,11 +7,10 @@ export const defaultCollections: IFrosoCollectionConfig[] = [
     },
     { collectionName: 'files', indexes: [{ key: { id: 1 }, unique: true }], counter: true },
     {
-        collectionName: 'pages',
+        collectionName: 'posts',
         counter: true,
         indexes: [{ key: { id: 1 }, unique: true }, { key: { url: 1 } }]
     },
-    { collectionName: 'posts', indexes: [{ key: { id: 1 }, unique: true }], counter: true },
     { collectionName: 'post_types', indexes: [{ key: { id: 1 }, unique: true }], counter: true },
     { collectionName: 'users', indexes: [{ key: { username: 1 }, unique: true }], counter: true }
 ];

@@ -1,4 +1,4 @@
 export * from './winston';
 export * from './morgan';
 export * from './mongo';
-export * from './defaultCollections';
+export * from './default-collections';

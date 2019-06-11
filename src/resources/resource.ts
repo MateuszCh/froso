@@ -5,32 +5,34 @@ import { frosoMongo } from '../config';
 import { notFalsyValidator, requiredValidator } from '../utils';
 
 export interface IResourceData {
-    created?: number;
-    id?: number;
-    type?: string;
+    created: number;
+    id: number;
+    resourceType: string;
 }
 
 export interface IResourceRequestData {
     id?: number;
+    resourceType?: string;
     [key: string]: any;
 }
 
 export abstract class Resource<T extends IResourceData, D extends IResourceRequestData> {
-    public abstract readonly type: string;
+    public abstract readonly resourceType: string;
 
     public abstract readonly collectionName: string;
 
     public requiredFields: string[] = [];
+    public allowedFields: string[] = [];
 
     public _createValidators: ValidationChain[] = [];
     public _updateValidators: ValidationChain[] = [];
 
     public get createValidators(): ValidationChain[] {
-        return [...this._createValidators, requiredValidator(this.requiredFields)];
+        return [...this._createValidators, requiredValidator<D>(this.requiredFields)];
     }
 
     public get updateValidators(): ValidationChain[] {
-        return [...this._updateValidators, notFalsyValidator(this.requiredFields)];
+        return [...this._updateValidators, notFalsyValidator<D>(this.requiredFields)];
     }
 
     public get collection(): Collection {
@@ -65,7 +67,7 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     }
 
     public create(requestData: D): Promise<InsertOneWriteOpResult> {
-        const data: IResourceData = { ...requestData, created: Date.now(), type: this.type };
+        const data: D = { ...requestData, created: Date.now(), resourceType: this.resourceType };
         return this.collection.insertOne(data);
     }
 }

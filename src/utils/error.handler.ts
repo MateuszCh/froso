@@ -1,8 +1,8 @@
-import { Application, NextFunction, Request, Response } from 'express';
+import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import { isString } from 'lodash';
 
-export function errorHandler(app: Application) {
-    app.use((err: any, req: Request, res: Response, next: NextFunction) => res.status(422).send(getError(err)));
+export function errorHandler(): ErrorRequestHandler {
+    return (err: any, req: Request, res: Response, next: NextFunction) => res.status(422).send(getError(err));
 }
 
 export function getError(err: any): { error: any } | any {

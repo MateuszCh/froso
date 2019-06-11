@@ -12,7 +12,7 @@ export interface ICounterRequestData extends IResourceRequestData {
 }
 
 export class Counter extends Resource<ICounterData, ICounterRequestData> {
-    public readonly type = 'counter';
+    public readonly resourceType = 'counter';
     public readonly collectionName = 'counters';
 
     public findByCollectionName(collectionName: string): Promise<ICounterData | null> {
@@ -25,6 +25,6 @@ export class Counter extends Resource<ICounterData, ICounterRequestData> {
 
     public create(data: ICounterRequestData): Promise<InsertOneWriteOpResult> {
         data.counter = 1;
-        return this.create(data);
+        return super.create(data);
     }
 }

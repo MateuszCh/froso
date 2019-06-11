@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { capitalize } from 'lodash';
 
 import { Counter, IResourceData, IResourceRequestData, Resource } from '../resources';
+import { getError } from '../utils';
 
 export abstract class AbstractController<T extends IResourceData, D extends IResourceRequestData> {
     public abstract resource: Resource<T, D>;
@@ -17,7 +18,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
         const id: number = req.params.id;
         const modelData: T | null = await this.resource.findById(id);
         if (!modelData) {
-            return next(`There is no ${this.resource.type} with ${id} id`);
+            return res.status(404).send(getError(`There is no ${this.resource.resourceType} with ${id} id`));
         } else {
             return res.send(modelData);
         }
@@ -31,9 +32,9 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
             if (deleteResult.value) {
                 return res.status(200).send(deleteResult.value);
             }
-            return res.status(404).send(`There is no ${this.resource.type} widh id: ${id}`);
+            return res.status(404).send(getError(`There is no ${this.resource.resourceType} widh id: ${id}`));
         } else {
-            return next(`There was an error deleting ${this.resource.type} with id: ${id}`);
+            return next(`There was an error deleting ${this.resource.resourceType} with id: ${id}`);
         }
     };
 
@@ -45,9 +46,9 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
             if (updateResult.value) {
                 return res.status(200).send(updateResult.value);
             }
-            return res.status(404).send(`There is no ${this.resource.type} widh id: ${id}`);
+            return res.status(404).send(getError(`There is no ${this.resource.resourceType} widh id: ${id}`));
         } else {
-            return next(`There was an error updating ${this.resource.type} with id: ${id}`);
+            return next(`There was an error updating ${this.resource.resourceType} with id: ${id}`);
         }
     };
 
@@ -66,7 +67,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
             delete resultData._id;
             return res.status(200).send(resultData);
         } else {
-            return next(`${capitalize(this.resource.type)} was not created.`);
+            return next(`${capitalize(this.resource.resourceType)} was not created.`);
         }
     };
 }

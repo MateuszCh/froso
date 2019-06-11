@@ -11,7 +11,8 @@ export interface IUserRequestData extends IResourceRequestData {
 }
 
 export class User extends Resource<IUserData, IUserRequestData> {
-    public readonly type = 'user';
+    public readonly resourceType = 'user';
     public readonly collectionName = 'users';
     public requiredFields = ['username', 'password'];
+    public allowedFields = [...this.requiredFields];
 }

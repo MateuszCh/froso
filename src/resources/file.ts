@@ -27,7 +27,19 @@ export interface IFileRequestData extends IResourceRequestData {
 }
 
 export class FrosoFile extends Resource<IFileData, IFileRequestData> {
-    public readonly type = 'file';
+    public readonly resourceType = 'file';
     public readonly collectionName = 'files';
     public requiredFields = ['filename'];
+    public allowedFields = [
+        ...this.requiredFields,
+        'title',
+        'src',
+        'description',
+        'author',
+        'place',
+        'type',
+        'size',
+        'catalogues',
+        'position'
+    ];
 }
