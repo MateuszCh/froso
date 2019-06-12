@@ -1,4 +1,4 @@
 export * from './middlewares';
-export * from './error.handler';
+export * from './request-handlers';
 export * from './validators';
 export * from './sanitizers';

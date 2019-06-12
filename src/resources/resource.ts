@@ -29,6 +29,10 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     public _createValidators: ValidationChain[] = [];
     public _updateValidators: ValidationChain[] = [];
 
+    public formatResource(data: D): D {
+        return data;
+    }
+
     public get createValidators(): ValidationChain[] {
         return [
             ...this._createValidators,
