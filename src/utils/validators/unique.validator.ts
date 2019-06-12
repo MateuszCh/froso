@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { body, ValidationChain } from 'express-validator/check';
-import { find, map, pick } from 'lodash';
+import { find, get, map, pick } from 'lodash';
 
 import { IResourceData, IResourceRequestData, Resource } from '../../resources';
 
@@ -10,7 +10,7 @@ export interface ICustomValidatorOptions {
     path: string;
 }
 
-export function uniqueValidator<T extends IResourceData, D extends IResourceRequestData>(
+export function uniqueValidatorFactory<T extends IResourceData, D extends IResourceRequestData>(
     fields: string[],
     resource: Resource<T, D>
 ): ValidationChain {
@@ -31,11 +31,11 @@ export function uniqueValidator<T extends IResourceData, D extends IResourceRequ
         const uniqueModel = await resource.findOne({ $and: [{ $or: queryArray }, { id: { $ne: id } }] });
         if (uniqueModel) {
             const duplicateField = find(fields, (key: string) => {
-                return data[key] === uniqueModel[key];
+                return get(data, key) === get(uniqueModel, key);
             });
             if (duplicateField) {
                 return Promise.reject(
-                    `There already is ${resource.resourceType} with ${duplicateField}: ${data[duplicateField]}`
+                    `There already is ${resource.resourceType} with ${duplicateField}: ${get(data, duplicateField)}`
                 );
             }
         }

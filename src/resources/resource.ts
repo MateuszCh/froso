@@ -2,19 +2,17 @@ import { ValidationChain } from 'express-validator/check';
 import { Collection, Db, FilterQuery, FindAndModifyWriteOpResultObject, InsertOneWriteOpResult } from 'mongodb';
 
 import { frosoMongo } from '../config';
-import { notFalsyValidator, requiredValidator, uniqueValidator } from '../utils';
+import { notFalsyValidatorFactory, requiredValidatorFactory, uniqueValidatorFactory } from '../utils';
 
 export interface IResourceData {
     created: number;
     id: number;
     resourceType: string;
-    [key: string]: any;
 }
 
 export interface IResourceRequestData {
     id?: number;
     resourceType?: string;
-    [key: string]: any;
 }
 
 export abstract class Resource<T extends IResourceData, D extends IResourceRequestData> {
@@ -36,16 +34,16 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     public get createValidators(): ValidationChain[] {
         return [
             ...this._createValidators,
-            requiredValidator<D>(this.requiredFields),
-            uniqueValidator(this.uniqueFields, this)
+            requiredValidatorFactory<D>(this.requiredFields),
+            uniqueValidatorFactory(this.uniqueFields, this)
         ];
     }
 
     public get updateValidators(): ValidationChain[] {
         return [
             ...this._updateValidators,
-            notFalsyValidator<D>(this.requiredFields),
-            uniqueValidator(this.uniqueFields, this)
+            notFalsyValidatorFactory<D>(this.requiredFields),
+            uniqueValidatorFactory(this.uniqueFields, this)
         ];
     }
 

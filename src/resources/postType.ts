@@ -1,4 +1,4 @@
-import { formatFields } from '../utils/functions';
+import { fieldsIdsValidator, fieldsRequiredValidator, formatFields } from '../utils';
 import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IFieldData {
@@ -26,9 +26,9 @@ export interface IPostTypeRequestData extends IResourceRequestData {
     isComponent?: boolean;
 }
 
-export const requiredFieldDatafields = ['title', 'type', 'id'];
+export const requiredFieldDataFields = ['title', 'type', 'id'];
 export const allowedFieldDataFields = [
-    ...requiredFieldDatafields,
+    ...requiredFieldDataFields,
     'selectOptions',
     'multiselectOptions',
     'repeaterFields'
@@ -40,6 +40,8 @@ export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public requiredFields = ['title', 'pluralTitle', 'type'];
     public allowedFields = [...this.requiredFields, 'fields', 'isComponent'];
     public uniqueFields = ['type'];
+    public _createValidators = [fieldsIdsValidator, fieldsRequiredValidator];
+    public _updateValidators = [fieldsIdsValidator, fieldsRequiredValidator];
 
     public formatResource(data: IPostTypeRequestData): IPostTypeRequestData {
         const postType = { ...data };
