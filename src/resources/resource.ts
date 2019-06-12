@@ -2,12 +2,13 @@ import { ValidationChain } from 'express-validator/check';
 import { Collection, Db, FilterQuery, FindAndModifyWriteOpResultObject, InsertOneWriteOpResult } from 'mongodb';
 
 import { frosoMongo } from '../config';
-import { notFalsyValidator, requiredValidator } from '../utils';
+import { notFalsyValidator, requiredValidator, uniqueValidator } from '../utils';
 
 export interface IResourceData {
     created: number;
     id: number;
     resourceType: string;
+    [key: string]: any;
 }
 
 export interface IResourceRequestData {
@@ -23,16 +24,25 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
 
     public requiredFields: string[] = [];
     public allowedFields: string[] = [];
+    public uniqueFields: string[] = [];
 
     public _createValidators: ValidationChain[] = [];
     public _updateValidators: ValidationChain[] = [];
 
     public get createValidators(): ValidationChain[] {
-        return [...this._createValidators, requiredValidator<D>(this.requiredFields)];
+        return [
+            ...this._createValidators,
+            requiredValidator<D>(this.requiredFields),
+            uniqueValidator(this.uniqueFields, this)
+        ];
     }
 
     public get updateValidators(): ValidationChain[] {
-        return [...this._updateValidators, notFalsyValidator<D>(this.requiredFields)];
+        return [
+            ...this._updateValidators,
+            notFalsyValidator<D>(this.requiredFields),
+            uniqueValidator(this.uniqueFields, this)
+        ];
     }
 
     public get collection(): Collection {
@@ -48,6 +58,10 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
             .find(query)
             .project({ _id: 0 })
             .toArray();
+    }
+
+    public findOne(query: FilterQuery<T> = {}): Promise<T | null> {
+        return this.collection.findOne(query, { projection: { _id: 0 } });
     }
 
     public findById(id: number): Promise<T | null> {

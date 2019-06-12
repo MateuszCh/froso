@@ -23,9 +23,9 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
         this.router.patch(
             '/:id',
             allowedFieldsMiddleware(this.controller.resource.allowedFields),
+            toIdSanitizer,
             this.controller.resource.updateValidators,
             validationMiddleware,
-            toIdSanitizer,
             asyncMiddleware(this.controller.updateById)
         );
         return this.router;

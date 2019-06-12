@@ -1,5 +1,6 @@
 import { body, ValidationChain } from 'express-validator/check';
 import { capitalize, find } from 'lodash';
+
 import { IResourceRequestData } from '../../resources';
 
 export function notFalsyValidator<T extends IResourceRequestData>(fields: string[]): ValidationChain {

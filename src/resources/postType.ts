@@ -30,4 +30,5 @@ export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public readonly collectionName = 'post_types';
     public requiredFields = ['title', 'pluralTitle', 'type'];
     public allowedFields = [...this.requiredFields, 'fields', 'isComponent'];
+    public uniqueFields = ['type'];
 }

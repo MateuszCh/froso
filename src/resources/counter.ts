@@ -1,4 +1,5 @@
 import { InsertOneWriteOpResult, UpdateWriteOpResult } from 'mongodb';
+
 import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface ICounterData extends IResourceData {
