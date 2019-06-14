@@ -1,5 +1,14 @@
 import { ValidationChain } from 'express-validator/check';
-import { Collection, Db, FilterQuery, FindAndModifyWriteOpResultObject, InsertOneWriteOpResult } from 'mongodb';
+import {
+    Collection,
+    Db,
+    DeleteWriteOpResultObject,
+    FilterQuery,
+    FindAndModifyWriteOpResultObject,
+    InsertOneWriteOpResult,
+    UpdateQuery,
+    UpdateWriteOpResult
+} from 'mongodb';
 
 import { frosoMongo } from '../config';
 import { notFalsyValidatorFactory, requiredValidatorFactory, uniqueValidatorFactory } from '../utils';
@@ -70,8 +79,16 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
         return this.collection.findOne({ id }, { projection: { _id: 0 } });
     }
 
+    public delete(query: FilterQuery<T> = {}): Promise<DeleteWriteOpResultObject> {
+        return this.collection.deleteMany(query);
+    }
+
     public deleteById(id: number): Promise<FindAndModifyWriteOpResultObject<T>> {
         return this.collection.findOneAndDelete({ id }, { projection: { _id: 0 } });
+    }
+
+    public update(query: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateWriteOpResult> {
+        return this.collection.updateMany(query, update);
     }
 
     public updateById(id: number, data: D): Promise<FindAndModifyWriteOpResultObject<T>> {

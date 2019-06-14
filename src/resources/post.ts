@@ -1,3 +1,4 @@
+import { postTypeExistsValidator } from '../utils';
 import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IPostData extends IResourceData {
@@ -23,4 +24,6 @@ export class Post extends Resource<IPostData, IPostRequestData> {
     public readonly collectionName = 'posts';
     public requiredFields = ['title', 'type'];
     public allowedFields = [...this.requiredFields, 'url', 'data'];
+    public _createValidators = [postTypeExistsValidator];
+    public _updateValidators = [postTypeExistsValidator];
 }

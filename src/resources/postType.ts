@@ -1,4 +1,6 @@
-import { fieldsIdsValidator, fieldsRequiredValidator, formatFields } from '../utils';
+import { InsertOneWriteOpResult } from 'mongodb';
+
+import { fieldsIdsValidator, fieldsRequiredValidator, formatFields, formatId } from '../utils';
 import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IFieldData {
@@ -15,7 +17,7 @@ export interface IPostTypeData extends IResourceData {
     pluralTitle: string;
     type: string;
     fields: IFieldData[];
-    isComponent: boolean;
+    posts: number[];
 }
 
 export interface IPostTypeRequestData extends IResourceRequestData {
@@ -23,7 +25,7 @@ export interface IPostTypeRequestData extends IResourceRequestData {
     pluralTitle?: string;
     type?: string;
     fields?: IFieldData[];
-    isComponent?: boolean;
+    posts: number[];
 }
 
 export const requiredFieldDataFields = ['title', 'type', 'id'];
@@ -38,16 +40,24 @@ export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public readonly resourceType = 'post_type';
     public readonly collectionName = 'post_types';
     public requiredFields = ['title', 'pluralTitle', 'type'];
-    public allowedFields = [...this.requiredFields, 'fields', 'isComponent'];
+    public allowedFields = [...this.requiredFields, 'fields'];
     public uniqueFields = ['type'];
     public _createValidators = [fieldsIdsValidator, fieldsRequiredValidator];
     public _updateValidators = [fieldsIdsValidator, fieldsRequiredValidator];
 
     public formatResource(data: IPostTypeRequestData): IPostTypeRequestData {
         const postType = { ...data };
+        if (postType.type) {
+            postType.type = formatId(postType.type);
+        }
         if (postType.fields) {
             postType.fields = formatFields(postType.fields);
         }
         return postType;
+    }
+
+    public create(data: IPostTypeRequestData): Promise<InsertOneWriteOpResult> {
+        data.posts = [];
+        return super.create(data);
     }
 }

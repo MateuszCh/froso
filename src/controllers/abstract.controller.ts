@@ -30,6 +30,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
 
         if (deleteResult.ok && deleteResult.ok === 1) {
             if (deleteResult.value) {
+                await this.onRemove(deleteResult.value);
                 return res.status(200).send(deleteResult.value);
             }
             return res.status(404).send(getError(`There is no ${this.resource.resourceType} widh id: ${id}`));
@@ -44,6 +45,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
         const updateResult = await this.resource.updateById(id, data);
         if (updateResult.ok && updateResult.ok === 1) {
             if (updateResult.value) {
+                await this.onUpdate(updateResult.value);
                 return res.status(200).send(updateResult.value);
             }
             return res.status(404).send(getError(`There is no ${this.resource.resourceType} widh id: ${id}`));
@@ -65,9 +67,22 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
         if (createResult.result.ok && createResult.result.ok === 1) {
             const resultData = createResult.ops[0];
             delete resultData._id;
+            await this.onCreate(resultData);
             return res.status(200).send(resultData);
         } else {
             return next(`${capitalize(this.resource.resourceType)} was not created.`);
         }
+    };
+
+    protected onRemove = async (deletedResource: T): Promise<any> => {
+        return true;
+    };
+
+    protected onUpdate = async (updatedResource: T): Promise<any> => {
+        return true;
+    };
+
+    protected onCreate = async (createdResource: T): Promise<any> => {
+        return true;
     };
 }
