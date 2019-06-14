@@ -42,17 +42,17 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
 
     public get createValidators(): ValidationChain[] {
         return [
-            ...this._createValidators,
             requiredValidatorFactory<D>(this.requiredFields),
-            uniqueValidatorFactory(this.uniqueFields, this)
+            uniqueValidatorFactory(this.uniqueFields, this),
+            ...this._createValidators
         ];
     }
 
     public get updateValidators(): ValidationChain[] {
         return [
-            ...this._updateValidators,
             notFalsyValidatorFactory<D>(this.requiredFields),
-            uniqueValidatorFactory(this.uniqueFields, this)
+            uniqueValidatorFactory(this.uniqueFields, this),
+            ...this._updateValidators
         ];
     }
 
