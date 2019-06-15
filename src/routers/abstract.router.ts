@@ -5,7 +5,7 @@ import { IResourceData, IResourceRequestData } from '../resources';
 import {
     allowedFieldsMiddleware,
     asyncMiddleware,
-    formatResourceMiddleware,
+    formatBeforeSaveMiddleware,
     toIdSanitizer,
     validationMiddleware
 } from '../utils';
@@ -22,7 +22,7 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
         this.router.post(
             '',
             allowedFieldsMiddleware(this.controller.resource.allowedFields),
-            formatResourceMiddleware(this.controller.resource),
+            formatBeforeSaveMiddleware(this.controller.resource),
             this.controller.resource.createValidators,
             validationMiddleware,
             asyncMiddleware(this.controller.create)
@@ -30,7 +30,7 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
         this.router.patch(
             '/:id',
             allowedFieldsMiddleware(this.controller.resource.allowedFields),
-            formatResourceMiddleware(this.controller.resource),
+            formatBeforeSaveMiddleware(this.controller.resource),
             toIdSanitizer,
             this.controller.resource.updateValidators,
             validationMiddleware,

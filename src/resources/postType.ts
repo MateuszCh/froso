@@ -8,7 +8,9 @@ export interface IFieldData {
     type: string;
     id: string;
     selectOptions?: string;
+    options?: string[];
     multiselectOptions?: string;
+    multiOptions?: string[];
     repeaterFields?: IFieldData[];
 }
 
@@ -45,7 +47,7 @@ export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public _createValidators = [fieldsIdsValidator, fieldsRequiredValidator];
     public _updateValidators = [fieldsIdsValidator, fieldsRequiredValidator];
 
-    public formatResource(data: IPostTypeRequestData): IPostTypeRequestData {
+    public formatBeforeSave(data: IPostTypeRequestData): IPostTypeRequestData {
         const postType = { ...data };
         if (postType.type) {
             postType.type = formatId(postType.type);
