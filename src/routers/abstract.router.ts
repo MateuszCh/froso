@@ -3,9 +3,9 @@ import { Router } from 'express';
 import { AbstractController } from '../controllers';
 import { IResourceData, IResourceRequestData } from '../resources';
 import {
-    allowedFieldsMiddleware,
+    allowedFieldsMiddlewareFactory,
     asyncMiddleware,
-    formatBeforeSaveMiddleware,
+    formatBeforeSaveMiddlewareFactory,
     toIdSanitizer,
     validationMiddleware
 } from '../utils';
@@ -21,17 +21,17 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
         this.router.delete('/:id', toIdSanitizer, asyncMiddleware(this.controller.removeById));
         this.router.post(
             '',
-            allowedFieldsMiddleware(this.controller.resource.allowedFields),
-            formatBeforeSaveMiddleware(this.controller.resource),
+            allowedFieldsMiddlewareFactory(this.controller.resource.allowedFields),
+            formatBeforeSaveMiddlewareFactory(this.controller.resource),
             this.controller.resource.createValidators,
             validationMiddleware,
             asyncMiddleware(this.controller.create)
         );
-        this.router.patch(
+        this.router.put(
             '/:id',
-            allowedFieldsMiddleware(this.controller.resource.allowedFields),
-            formatBeforeSaveMiddleware(this.controller.resource),
             toIdSanitizer,
+            allowedFieldsMiddlewareFactory(this.controller.resource.allowedFields),
+            formatBeforeSaveMiddlewareFactory(this.controller.resource),
             this.controller.resource.updateValidators,
             validationMiddleware,
             asyncMiddleware(this.controller.updateById)

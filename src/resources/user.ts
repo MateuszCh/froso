@@ -13,6 +13,6 @@ export interface IUserRequestData extends IResourceRequestData {
 export class User extends Resource<IUserData, IUserRequestData> {
     public readonly resourceType = 'user';
     public readonly collectionName = 'users';
+    public defaults = {};
     public requiredFields = ['username', 'password'];
-    public allowedFields = [...this.requiredFields];
 }

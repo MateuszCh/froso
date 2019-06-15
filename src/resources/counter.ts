@@ -15,6 +15,7 @@ export interface ICounterRequestData extends IResourceRequestData {
 export class Counter extends Resource<ICounterData, ICounterRequestData> {
     public readonly resourceType = 'counter';
     public readonly collectionName = 'counters';
+    public defaults = {};
 
     public findByCollectionName(collectionName: string): Promise<ICounterData | null> {
         return this.collection.findOne({ collectionName }, { projection: { _id: 0 } });

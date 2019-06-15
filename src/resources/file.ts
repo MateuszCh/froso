@@ -30,16 +30,13 @@ export class FrosoFile extends Resource<IFileData, IFileRequestData> {
     public readonly resourceType = 'file';
     public readonly collectionName = 'files';
     public requiredFields = ['filename'];
-    public allowedFields = [
-        ...this.requiredFields,
-        'title',
-        'src',
-        'description',
-        'author',
-        'place',
-        'type',
-        'size',
-        'catalogues',
-        'position'
-    ];
+    public notRequiredFields = ['title', 'description', 'author', 'place', 'catalogues', 'position'];
+    public defaults = {
+        author: undefined,
+        catalogoues: [],
+        description: undefined,
+        place: undefined,
+        position: undefined,
+        title: undefined
+    };
 }

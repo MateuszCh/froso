@@ -27,7 +27,7 @@ export interface IPostTypeRequestData extends IResourceRequestData {
     pluralTitle?: string;
     type?: string;
     fields?: IFieldData[];
-    posts: number[];
+    posts?: number[];
 }
 
 export const requiredFieldDataFields = ['title', 'type', 'id'];
@@ -42,8 +42,11 @@ export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public readonly resourceType = 'post_type';
     public readonly collectionName = 'post_types';
     public requiredFields = ['title', 'pluralTitle', 'type'];
-    public allowedFields = [...this.requiredFields, 'fields'];
+    public notRequiredFields = ['fields'];
     public uniqueFields = ['type'];
+    public defaults = {
+        fields: []
+    };
     public _createValidators = [fieldsIdsValidator, fieldsRequiredValidator];
     public _updateValidators = [fieldsIdsValidator, fieldsRequiredValidator];
 

@@ -23,7 +23,8 @@ export class Post extends Resource<IPostData, IPostRequestData> {
     public readonly resourceType = 'post';
     public readonly collectionName = 'posts';
     public requiredFields = ['title', 'type'];
-    public allowedFields = [...this.requiredFields, 'url', 'data'];
+    public notRequiredFields = ['url', 'data'];
+    public defaults = { data: {}, url: undefined };
     public _createValidators = [postTypeExistsValidator];
     public _updateValidators = [postTypeExistsValidator];
 }

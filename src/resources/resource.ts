@@ -1,4 +1,5 @@
 import { ValidationChain } from 'express-validator/check';
+import { defaults, isUndefined, mapValues, omitBy, pickBy } from 'lodash';
 import {
     Collection,
     Db,
@@ -11,7 +12,7 @@ import {
 } from 'mongodb';
 
 import { frosoMongo } from '../config';
-import { notFalsyValidatorFactory, requiredValidatorFactory, uniqueValidatorFactory } from '../utils';
+import { requiredValidatorFactory, uniqueValidatorFactory } from '../utils';
 
 export interface IResourceData {
     created: number;
@@ -26,18 +27,19 @@ export interface IResourceRequestData {
 
 export abstract class Resource<T extends IResourceData, D extends IResourceRequestData> {
     public abstract readonly resourceType: string;
-
     public abstract readonly collectionName: string;
-
-    public requiredFields: string[] = [];
-    public allowedFields: string[] = [];
-    public uniqueFields: string[] = [];
 
     public _createValidators: ValidationChain[] = [];
     public _updateValidators: ValidationChain[] = [];
 
-    public formatBeforeSave(data: D): D {
-        return data;
+    public requiredFields: string[] = [];
+    public notRequiredFields: string[] = [];
+    public uniqueFields: string[] = [];
+
+    public abstract defaults: D;
+
+    public get allowedFields(): string[] {
+        return [...this.requiredFields, ...this.notRequiredFields];
     }
 
     public get createValidators(): ValidationChain[] {
@@ -50,10 +52,14 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
 
     public get updateValidators(): ValidationChain[] {
         return [
-            notFalsyValidatorFactory<D>(this.requiredFields),
+            requiredValidatorFactory<D>(this.requiredFields),
             uniqueValidatorFactory(this.uniqueFields, this),
             ...this._updateValidators
         ];
+    }
+
+    public formatBeforeSave(data: D): D {
+        return data;
     }
 
     public get collection(): Collection {
@@ -92,15 +98,23 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     }
 
     public updateById(id: number, data: D): Promise<FindAndModifyWriteOpResultObject<T>> {
-        return this.collection.findOneAndUpdate(
-            { id },
-            { $set: data },
-            { projection: { _id: 0 }, returnOriginal: false }
-        );
+        data = defaults(data, this.defaults);
+        const toSet = omitBy(data, isUndefined);
+        const toUnset = pickBy(data, isUndefined);
+
+        const update: UpdateQuery<D> = { $set: toSet };
+        if (Object.keys(toUnset).length) {
+            update.$unset = mapValues(toUnset, () => '') as { [key: string]: '' };
+        }
+
+        return this.collection.findOneAndUpdate({ id }, update, { projection: { _id: 0 }, returnOriginal: false });
     }
 
     public create(requestData: D): Promise<InsertOneWriteOpResult> {
-        const data: D = { ...requestData, created: Date.now(), resourceType: this.resourceType };
-        return this.collection.insertOne(data);
+        const data: D = defaults(
+            { ...requestData, created: Date.now(), resourceType: this.resourceType },
+            this.defaults
+        );
+        return this.collection.insertOne(omitBy(data, isUndefined));
     }
 }
