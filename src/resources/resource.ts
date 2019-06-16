@@ -1,5 +1,5 @@
 import { ValidationChain } from 'express-validator/check';
-import { defaults, isUndefined, mapValues, omitBy, pickBy } from 'lodash';
+import { defaults, mapValues } from 'lodash';
 import {
     Collection,
     Db,
@@ -12,7 +12,7 @@ import {
 } from 'mongodb';
 
 import { frosoMongo } from '../config';
-import { requiredValidatorFactory, uniqueValidatorFactory } from '../utils';
+import { filterEmpty, requiredValidatorFactory, uniqueValidatorFactory } from '../utils';
 
 export interface IResourceData {
     created: number;
@@ -98,9 +98,9 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     }
 
     public updateById(id: number, data: D): Promise<FindAndModifyWriteOpResultObject<T>> {
-        data = defaults(data, this.defaults);
-        const toSet = omitBy(data, isUndefined);
-        const toUnset = pickBy(data, isUndefined);
+        data = this.getFullData(data);
+        const toSet = filterEmpty(data);
+        const toUnset = filterEmpty(data, true);
 
         const update: UpdateQuery<D> = { $set: toSet };
         if (Object.keys(toUnset).length) {
@@ -111,10 +111,12 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     }
 
     public create(requestData: D): Promise<InsertOneWriteOpResult> {
-        const data: D = defaults(
-            { ...requestData, created: Date.now(), resourceType: this.resourceType },
-            this.defaults
-        );
-        return this.collection.insertOne(omitBy(data, isUndefined));
+        const data = this.getFullData({ ...requestData, created: Date.now(), resourceType: this.resourceType });
+
+        return this.collection.insertOne(filterEmpty(data));
+    }
+
+    public getFullData(data: D): D {
+        return defaults(data, this.defaults);
     }
 }

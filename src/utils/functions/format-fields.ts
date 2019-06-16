@@ -1,11 +1,12 @@
 import { compact, map, pick } from 'lodash';
 
 import { allowedFieldDataFields, IFieldData } from '../../resources';
+import { filterEmpty } from './filter-empty';
 import { formatId } from './format-id';
 
 export function formatFields(fields: IFieldData[]): IFieldData[] {
     return map(fields, field => {
-        const fieldData = pick({ ...field }, allowedFieldDataFields) as IFieldData;
+        const fieldData = filterEmpty(pick({ ...field }, allowedFieldDataFields)) as IFieldData;
         if (fieldData.id) {
             fieldData.id = formatId(fieldData.id);
         }
