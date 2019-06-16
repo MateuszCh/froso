@@ -5,9 +5,9 @@ import { IFieldData } from '../../resources';
 import { checkFieldsRequired } from '../functions';
 
 export const fieldsRequiredValidator = body('fields').custom((fields: IFieldData[]) => {
-    const areFieldsRequiredInvalid = checkFieldsRequired(fields);
-    if (areFieldsRequiredInvalid) {
-        throw new Error(`${capitalize(areFieldsRequiredInvalid)} is required`);
+    const invalidField = checkFieldsRequired(fields);
+    if (invalidField) {
+        throw new Error(`${capitalize(invalidField)} is required`);
     }
     return true;
 });

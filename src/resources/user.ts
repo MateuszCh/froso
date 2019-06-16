@@ -1,3 +1,4 @@
+import { isStringValidatorFactory } from '../utils';
 import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IUserData extends IResourceData {
@@ -15,4 +16,6 @@ export class User extends Resource<IUserData, IUserRequestData> {
     public readonly collectionName = 'users';
     public defaults = {};
     public requiredFields = ['username', 'password'];
+    public uniqueFields = ['username'];
+    public _typesValidators = [isStringValidatorFactory('username'), isStringValidatorFactory('password')];
 }

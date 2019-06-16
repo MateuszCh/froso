@@ -1,9 +1,10 @@
+import { isString } from 'lodash';
 export function formatId(value: string): string {
-    return (
-        value &&
-        value
-            .trim()
-            .replace(/\s+/g, '_')
-            .toLowerCase()
-    );
+    if (!value || !isString(value)) {
+        return value;
+    }
+    return value
+        .trim()
+        .replace(/\s+/g, '_')
+        .toLowerCase();
 }

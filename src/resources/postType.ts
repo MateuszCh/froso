@@ -1,6 +1,13 @@
 import { InsertOneWriteOpResult } from 'mongodb';
 
-import { fieldsIdsValidator, fieldsRequiredValidator, formatFields, formatId } from '../utils';
+import {
+    fieldsIdsValidator,
+    fieldsRequiredValidator,
+    fieldsStringValidator,
+    formatFields,
+    formatId,
+    isStringValidatorFactory
+} from '../utils';
 import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IFieldData {
@@ -37,6 +44,7 @@ export const allowedFieldDataFields = [
     'multiselectOptions',
     'repeaterFields'
 ];
+export const stringFieldDataFields = [...requiredFieldDataFields, 'selectOptions', 'multiselectOptions'];
 
 export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public readonly resourceType = 'post_type';
@@ -47,8 +55,13 @@ export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public defaults = {
         fields: []
     };
-    public _createValidators = [fieldsIdsValidator, fieldsRequiredValidator];
-    public _updateValidators = [fieldsIdsValidator, fieldsRequiredValidator];
+    public _createValidators = [fieldsIdsValidator, fieldsRequiredValidator, fieldsStringValidator];
+    public _updateValidators = [fieldsIdsValidator, fieldsRequiredValidator, fieldsStringValidator];
+    public _typesValidators = [
+        isStringValidatorFactory('title'),
+        isStringValidatorFactory('pluralTitle'),
+        isStringValidatorFactory('type')
+    ];
 
     public formatBeforeSave(data: IPostTypeRequestData): IPostTypeRequestData {
         const postType = { ...data };

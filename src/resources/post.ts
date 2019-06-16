@@ -1,4 +1,4 @@
-import { postTypeExistsValidator } from '../utils';
+import { isStringValidatorFactory, postTypeExistsValidator } from '../utils';
 import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IPostData extends IResourceData {
@@ -27,4 +27,9 @@ export class Post extends Resource<IPostData, IPostRequestData> {
     public defaults = { data: {}, url: undefined };
     public _createValidators = [postTypeExistsValidator];
     public _updateValidators = [postTypeExistsValidator];
+    public _typesValidators = [
+        isStringValidatorFactory('title'),
+        isStringValidatorFactory('type'),
+        isStringValidatorFactory('url')
+    ];
 }

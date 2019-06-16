@@ -31,6 +31,7 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
 
     public _createValidators: ValidationChain[] = [];
     public _updateValidators: ValidationChain[] = [];
+    public _typesValidators: ValidationChain[] = [];
 
     public requiredFields: string[] = [];
     public notRequiredFields: string[] = [];
@@ -46,6 +47,7 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
         return [
             requiredValidatorFactory<D>(this.requiredFields),
             uniqueValidatorFactory(this.uniqueFields, this),
+            ...this._typesValidators,
             ...this._createValidators
         ];
     }
@@ -54,6 +56,7 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
         return [
             requiredValidatorFactory<D>(this.requiredFields),
             uniqueValidatorFactory(this.uniqueFields, this),
+            ...this._typesValidators,
             ...this._updateValidators
         ];
     }
