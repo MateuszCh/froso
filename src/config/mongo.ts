@@ -3,6 +3,13 @@ import { Db, IndexSpecification, MongoClient, MongoClientOptions } from 'mongodb
 
 import { Counter } from '../resources';
 
+export interface IFrosoMongoConfig {
+    uri: string;
+    db: string;
+    options?: MongoClientOptions;
+    collections?: IFrosoCollectionConfig[];
+}
+
 export interface IFrosoCollectionConfig {
     collectionName: string;
     counter?: boolean;
