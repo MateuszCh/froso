@@ -1,4 +1,5 @@
-import { Router } from 'express';
+import { RequestHandler, Router } from 'express';
+import { RequestHandlerParams } from 'express-serve-static-core';
 
 import { AbstractController } from '../controllers';
 import { IResourceData, IResourceRequestData } from '../resources';
@@ -15,27 +16,45 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
 
     protected abstract controller: AbstractController<T, D>;
 
-    public getRouter(): Router {
-        this.router.get('', asyncMiddleware(this.controller.getAll));
-        this.router.get('/:id', toIdSanitizer, asyncMiddleware(this.controller.getById));
-        this.router.delete('/:id', toIdSanitizer, asyncMiddleware(this.controller.removeById));
-        this.router.post(
-            '',
+    public get getHandlers(): RequestHandler[] {
+        return [asyncMiddleware(this.controller.getAll)];
+    }
+
+    public get getByIdHandlers(): RequestHandler[] {
+        return [toIdSanitizer, asyncMiddleware(this.controller.getById)];
+    }
+
+    public get deleteByIdHandlers(): RequestHandler[] {
+        return [toIdSanitizer, asyncMiddleware(this.controller.removeById)];
+    }
+
+    public get postHandlers(): RequestHandlerParams[] {
+        return [
             allowedFieldsMiddlewareFactory(this.controller.resource.allowedFields),
             formatBeforeSaveMiddlewareFactory(this.controller.resource),
             this.controller.resource.createValidators,
             validationMiddleware,
             asyncMiddleware(this.controller.create)
-        );
-        this.router.put(
-            '/:id',
+        ];
+    }
+
+    public get putHandlers(): RequestHandlerParams[] {
+        return [
             toIdSanitizer,
             allowedFieldsMiddlewareFactory(this.controller.resource.allowedFields),
             formatBeforeSaveMiddlewareFactory(this.controller.resource),
             this.controller.resource.updateValidators,
             validationMiddleware,
             asyncMiddleware(this.controller.updateById)
-        );
+        ];
+    }
+
+    public getRouter(): Router {
+        this.router.get('', ...this.getHandlers);
+        this.router.get('/:id', ...this.getByIdHandlers);
+        this.router.delete('/:id', ...this.deleteByIdHandlers);
+        this.router.post('', ...this.postHandlers);
+        this.router.put('/:id', ...this.putHandlers);
         return this.router;
     }
 }
