@@ -1,30 +1,30 @@
-import { UpdateWriteOpResult } from 'mongodb';
-
 import { IPostData, IPostRequestData, Post, PostType } from '../resources';
-import { AbstractController } from './abstract.controller';
+import { AbstractController, IOnResponse, okOnResponse } from './abstract.controller';
 
 export class PostsController extends AbstractController<IPostData, IPostRequestData> {
     public resource = new Post();
 
     public postTypeResource = new PostType();
 
-    public onCreate = async (createdResource: IPostData): Promise<UpdateWriteOpResult | true> => {
+    public async onCreate(createdResource: IPostData): Promise<IOnResponse> {
         if (createdResource) {
-            return this.postTypeResource.update(
+            await this.postTypeResource.update(
                 { type: createdResource.type },
                 { $push: { posts: createdResource.id } }
             );
+            return okOnResponse;
         }
-        return true;
-    };
+        return okOnResponse;
+    }
 
-    public onRemove = async (removedResource: IPostData): Promise<UpdateWriteOpResult | true> => {
+    public async onRemove(removedResource: IPostData): Promise<IOnResponse> {
         if (removedResource) {
-            return this.postTypeResource.update(
+            await this.postTypeResource.update(
                 { type: removedResource.type },
                 { $pull: { posts: removedResource.id } }
             );
+            return okOnResponse;
         }
-        return true;
-    };
+        return okOnResponse;
+    }
 }

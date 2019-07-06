@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator/check';
+import { isArray, map } from 'lodash';
+
+import { removeManyFiles } from '../functions';
 
 export interface IValidationError {
     location: Location;
@@ -8,8 +11,20 @@ export interface IValidationError {
     value: any;
 }
 
-export function validationMiddleware(req: Request, res: Response, next: NextFunction): Response | void {
+export async function validationMiddleware(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     const result = validationResult<IValidationError>(req);
 
-    return result.isEmpty() ? next() : res.status(422).send({ error: result.array()[0].msg });
+    if (result.isEmpty()) {
+        return next();
+    } else {
+        if (req.files && isArray(req.files) && req.files.length) {
+            const filesToRemove: string[] = map(req.files, file => `${file.destination}/${file.filename}`);
+            try {
+                await removeManyFiles(filesToRemove);
+            } catch (err) {
+                // do nothing
+            }
+        }
+        return res.status(422).send({ error: result.array()[0].msg });
+    }
 }

@@ -1,5 +1,4 @@
 import { RequestHandler, Router } from 'express';
-import { RequestHandlerParams } from 'express-serve-static-core';
 
 import { AbstractController } from '../controllers';
 import { IResourceData, IResourceRequestData } from '../resources';
@@ -28,22 +27,22 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
         return [toIdSanitizer, asyncMiddleware(this.controller.removeById)];
     }
 
-    public get postHandlers(): RequestHandlerParams[] {
+    public get postHandlers(): RequestHandler[] {
         return [
             allowedFieldsMiddlewareFactory(this.controller.resource.allowedFields),
             formatBeforeSaveMiddlewareFactory(this.controller.resource),
-            this.controller.resource.createValidators,
+            ...this.controller.resource.createValidators,
             validationMiddleware,
             asyncMiddleware(this.controller.create)
         ];
     }
 
-    public get putHandlers(): RequestHandlerParams[] {
+    public get putHandlers(): RequestHandler[] {
         return [
             toIdSanitizer,
             allowedFieldsMiddlewareFactory(this.controller.resource.allowedFields),
-            formatBeforeSaveMiddlewareFactory(this.controller.resource),
-            this.controller.resource.updateValidators,
+            formatBeforeSaveMiddlewareFactory<T, D>(this.controller.resource),
+            ...this.controller.resource.updateValidators,
             validationMiddleware,
             asyncMiddleware(this.controller.updateById)
         ];

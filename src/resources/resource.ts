@@ -1,5 +1,5 @@
 import { ValidationChain } from 'express-validator/check';
-import { defaults, mapValues } from 'lodash';
+import { defaults, map, mapValues } from 'lodash';
 import {
     Collection,
     Db,
@@ -7,6 +7,7 @@ import {
     FilterQuery,
     FindAndModifyWriteOpResultObject,
     InsertOneWriteOpResult,
+    InsertWriteOpResult,
     UpdateQuery,
     UpdateWriteOpResult
 } from 'mongodb';
@@ -18,6 +19,7 @@ export interface IResourceData {
     created: number;
     id: number;
     resourceType: string;
+    _id: string;
 }
 
 export interface IResourceRequestData {
@@ -117,6 +119,14 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
         const data = this.getFullData({ ...requestData, created: Date.now(), resourceType: this.resourceType });
 
         return this.collection.insertOne(filterEmpty(data));
+    }
+
+    public createMany(requestDataArray: D[]): Promise<InsertWriteOpResult> {
+        const dataArray = map(requestDataArray, (requestData: D) => {
+            return filterEmpty(this.getFullData({ ...requestData, created: Date.now() }));
+        });
+
+        return this.collection.insertMany(dataArray);
     }
 
     public getFullData(data: D): D {

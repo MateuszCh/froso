@@ -60,14 +60,14 @@ export class Multer {
         file: Express.Multer.File,
         callback: (error: Error | null, filename: string) => void
     ) {
-        callback(null, path.basename(file.originalname, file.originalname));
+        callback(null, file.originalname);
     }
 
-    public fileFilter(
+    public fileFilter = (
         req: Request,
         file: Express.Multer.File,
         callback: (error: Error | null, acceptFile: boolean) => void
-    ) {
+    ) => {
         if (includes(this.filenames, file.originalname)) {
             callback(Error(`${file.originalname} already exists`), false);
         } else if (includes(this.currentlyUploading, file.originalname)) {
@@ -83,7 +83,7 @@ export class Multer {
         } else {
             return callback(Error(`Error: Wrong file type ${file.originalname}`), false);
         }
-    }
+    };
 
     public upload = () => {
         return multer({
