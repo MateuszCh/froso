@@ -6,6 +6,4 @@ export class PostsRouter extends AbstractRouter<IPostData, IPostRequestData> {
     protected controller = new PostsController();
 }
 
-const postsRouter = new PostsRouter();
-
-export default postsRouter.getRouter();
+export const postsRouter = new PostsRouter();

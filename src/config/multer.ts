@@ -10,7 +10,7 @@ export interface IFrosoMulterConfig {
     directory?: string;
     fileTypes?: RegExp;
     limits?: IMulterLimits;
-    customMulter?: Multer;
+    customMulter?: FrosoMulter;
 }
 
 export interface IMulterLimits {
@@ -24,7 +24,7 @@ export interface IMulterLimits {
     preservePath?: boolean;
 }
 
-export class Multer {
+export class FrosoMulter {
     protected currentlyUploading: string[] = [];
     protected filenames: string[] = [];
 

@@ -5,7 +5,7 @@ import { Counter } from '../resources';
 
 export interface IFrosoMongoConfig {
     uri: string;
-    db: string;
+    dbName: string;
     options?: MongoClientOptions;
     collections?: IFrosoCollectionConfig[];
 }
@@ -18,7 +18,7 @@ export interface IFrosoCollectionConfig {
 
 export type OnConnectMongo = (db: Db) => void;
 
-export class Mongo {
+export class FrosoMongo {
     public db!: Db;
 
     public counter = new Counter();
@@ -64,4 +64,4 @@ export class Mongo {
     };
 }
 
-export const frosoMongo = new Mongo();
+export const frosoMongo = new FrosoMongo();
