@@ -1,13 +1,22 @@
 import * as bcryptjs from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
-import { compact, each, includes, map, uniqBy } from 'lodash';
+import { compact, each, includes, isString, map, pick, uniqBy } from 'lodash';
 import * as passport from 'passport';
 
 import { ICounterData, IUserData, IUserRequestData, User } from '../resources';
 import { AbstractController, OnResponseStatus } from './abstract.controller';
 
+export interface IChangePasswordRequest {
+    id: number;
+    password: string;
+    newPassword: string;
+    newPasswordConfirmation: string;
+}
+
 export class UsersController extends AbstractController<IUserData, IUserRequestData> {
     public resource = new User();
+
+    public changePasswordFields = ['id', 'password', 'newPassword', 'newPasswordConfirmation'];
 
     public login = (req: Request, res: Response, next: NextFunction): Response | void => {
         passport.authenticate('local', (err, user, info) => {
@@ -40,37 +49,24 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
     };
 
     public changePassword = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-        const { id, password, newPassword, newPasswordConfirmation } = req.body;
+        const body: IChangePasswordRequest = req.body;
 
-        if (newPassword && newPassword !== newPasswordConfirmation) {
-            // tslint:disable-next-line: quotemark
-            return next("Passwords don't match.");
+        const { id, password, newPassword } = body;
+
+        const user = await this.resource.findById(id);
+        if (!user) {
+            return next(`There is no user with id: ${id}`);
         }
-        if (
-            id &&
-            password &&
-            newPassword &&
-            newPasswordConfirmation &&
-            newPasswordConfirmation === newPassword &&
-            password !== newPassword
-        ) {
-            const user = await this.resource.findById(id);
-            if (!user) {
-                return next(`There is no user with id: ${id}`);
-            }
 
-            const compareResult = await bcryptjs.compare(password, user.password);
-            if (compareResult) {
-                const salt = await bcryptjs.genSalt(12);
-                const hash = await bcryptjs.hash(newPassword, salt);
-                user.password = hash;
-                await this.resource.updateById(id, user);
-                return res.send('Password changed');
-            } else {
-                return res.status(401).send({ error: 'Wrong password' });
-            }
+        const compareResult = await bcryptjs.compare(password, user.password);
+        if (compareResult) {
+            const salt = await bcryptjs.genSalt(12);
+            const hash = await bcryptjs.hash(newPassword, salt);
+            user.password = hash;
+            await this.resource.updateById(id, user);
+            return res.send('Password changed');
         } else {
-            return next('Incorrect data');
+            return res.status(401).send({ error: 'Wrong password' });
         }
     };
 
@@ -84,7 +80,13 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
 
     public createUsers = async (usersData: IUserRequestData[]): Promise<void | IUserData[]> => {
         const validUsers =
-            usersData && uniqBy(usersData.filter(user => user.username && user.password), user => user.username);
+            usersData &&
+            uniqBy(
+                usersData.filter(
+                    user => user.username && user.password && isString(user.username) && isString(user.password)
+                ),
+                user => user.username
+            );
         if (!validUsers || !validUsers.length) {
             console.log('There is no users to create');
             return;
@@ -107,7 +109,7 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
             compact(
                 map(validUsers, validUser => {
                     if (validUser.username && validUser.password && !includes(existingUsernames, validUser.username)) {
-                        return validUser;
+                        return pick(validUser, this.resource.allowedFields);
                     } else {
                         console.log(`${validUser.username} already exists`);
                         return undefined;
