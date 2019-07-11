@@ -87,7 +87,11 @@ export class Froso {
 
             const usersController = new UsersController();
 
-            await usersController.createUsers(this.config.passportConfig.users);
+            try {
+                await usersController.createUsers(this.config.passportConfig.users);
+            } catch (e) {
+                console.log(e);
+            }
 
             forEach(this.mongoCollections(), frosoMongo.initCollection);
             forEach(this.customRouters, (customRouter: express.Router) => this.express.use(customRouter));

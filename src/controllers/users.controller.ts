@@ -82,7 +82,7 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
         }
     };
 
-    public createUsers = async (usersData: IUserRequestData[]): Promise<void> => {
+    public createUsers = async (usersData: IUserRequestData[]): Promise<void | IUserData[]> => {
         const validUsers =
             usersData && uniqBy(usersData.filter(user => user.username && user.password), user => user.username);
         if (!validUsers || !validUsers.length) {
@@ -152,8 +152,10 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
             } else {
                 each(newUsers, newUser => console.log(`${newUser.username} was created successfully`));
             }
+            return newUsers;
         } else {
             console.log('There was an error creating new users');
+            return;
         }
 
         function getUsernames(users: IUserRequestData[] | IUserData[]): string[] {
