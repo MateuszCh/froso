@@ -28,16 +28,20 @@ export function uniqueValidatorFactory<T extends IResourceData, D extends IResou
         if (!queryArray.length) {
             return true;
         }
-        const uniqueModel = await resource.findOne({ $and: [{ $or: queryArray }, { id: { $ne: id } }] });
-        if (uniqueModel) {
-            const duplicateField = find(fields, (key: string) => {
-                return get(data, key) === get(uniqueModel, key);
-            });
-            if (duplicateField) {
-                return Promise.reject(
-                    `There already is ${resource.resourceType} with ${duplicateField}: ${get(data, duplicateField)}`
-                );
+        try {
+            const uniqueModel = await resource.findOne({ $and: [{ $or: queryArray }, { id: { $ne: id } }] });
+            if (uniqueModel) {
+                const duplicateField = find(fields, (key: string) => {
+                    return get(data, key) === get(uniqueModel, key);
+                });
+                if (duplicateField) {
+                    return Promise.reject(
+                        `There already is ${resource.resourceType} with ${duplicateField}: ${get(data, duplicateField)}`
+                    );
+                }
             }
+        } catch (err) {
+            return true;
         }
         return true;
     });

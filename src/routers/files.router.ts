@@ -8,13 +8,13 @@ import {
     formatFilesBeforeSaveMiddlewareFactory,
     validationMiddleware
 } from '../utils';
-import { Multer } from './../config';
+import { FrosoMulter } from './../config';
 import { AbstractRouter } from './abstract.router';
 
 export class FilesRouter extends AbstractRouter<IFileData, IFileRequestData> {
     protected controller: FilesController;
 
-    constructor(public multer: Multer) {
+    constructor(public multer: FrosoMulter) {
         super();
         this.controller = new FilesController(this.multer);
     }

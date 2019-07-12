@@ -3,13 +3,13 @@ import { each, values } from 'lodash';
 
 import { FrosoFile, IFileData, IFileRequestData, IFilesUploadData } from '../resources';
 import { removefile } from '../utils';
-import { Multer } from './../config/multer';
+import { FrosoMulter } from './../config/multer';
 import { AbstractController, IOnResponse, okOnResponse, OnResponseStatus } from './abstract.controller';
 
 export class FilesController extends AbstractController<IFileData, IFileRequestData> {
     public resource = new FrosoFile();
 
-    constructor(public multer: Multer) {
+    constructor(public multer: FrosoMulter) {
         super();
     }
 
