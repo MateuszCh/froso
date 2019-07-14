@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
+import * as fs from 'fs';
 import { capitalize } from 'lodash';
+import * as path from 'path';
 
 import { Counter, IResourceData, IResourceRequestData, Resource } from '../resources';
-import { getError } from '../utils';
+import { getError, writeFile } from '../utils';
 
 export interface IOnResponse {
     status: OnResponseStatus;
@@ -23,6 +25,8 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
     public abstract resource: Resource<T, D>;
 
     public counter = new Counter();
+
+    public exportDirectory = path.join(__dirname, '..', 'exports');
 
     public getAll = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
         const modelsData: T[] = await this.resource.find();
@@ -119,6 +123,24 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
             return res.status(200).send(resultData);
         } else {
             return next(defaultErrorMessage);
+        }
+    };
+
+    public export = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+        const modelsData: T[] = await this.resource.find(req.body || {}, { _id: 0, id: 0 });
+
+        const jsonModels = JSON.stringify(modelsData, null, 4);
+
+        if (!fs.existsSync(this.exportDirectory)) {
+            fs.mkdirSync(this.exportDirectory);
+        }
+
+        const writeError = await writeFile(`${this.exportDirectory}/${this.resource.collectionName}.json`, jsonModels);
+
+        if (writeError) {
+            return next(writeError);
+        } else {
+            return res.send(`/export/${this.resource.collectionName}`);
         }
     };
 

@@ -104,6 +104,8 @@ export class Froso {
                 this.express.use('/uploads', express.static(this.multer.directory));
             }
 
+            this.express.use('/export', express.static(`${__dirname}/exports`));
+
             this.express.get(['*'], (req: express.Request, res: express.Response) =>
                 res.send('<h1 style="color: steelblue">Froso</h1>')
             );

@@ -75,10 +75,10 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
         return frosoMongo.db;
     }
 
-    public find(query: FilterQuery<T> = {}): Promise<T[]> {
+    public find(query: FilterQuery<T> = {}, projection: object = { _id: 0 }): Promise<T[]> {
         return this.collection
             .find(query)
-            .project({ _id: 0 })
+            .project(projection)
             .toArray();
     }
 
@@ -123,7 +123,9 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
 
     public createMany(requestDataArray: D[]): Promise<InsertWriteOpResult> {
         const dataArray = map(requestDataArray, (requestData: D) => {
-            return filterEmpty(this.getFullData({ ...requestData, created: Date.now() }));
+            const data = filterEmpty(this.getFullData({ ...requestData }));
+            data.created = data.created || Date.now();
+            return data;
         });
 
         return this.collection.insertMany(dataArray);

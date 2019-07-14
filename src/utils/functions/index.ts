@@ -6,3 +6,4 @@ export * from './format-fields';
 export * from './format-id';
 export * from './remove-many-files';
 export * from './remove-file';
+export * from './write-file';
