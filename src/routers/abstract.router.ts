@@ -29,7 +29,7 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
 
     public get postHandlers(): RequestHandler[] {
         return [
-            allowedFieldsMiddlewareFactory(this.controller.resource.allowedFields),
+            allowedFieldsMiddlewareFactory<D>(this.controller.resource.allowedFields),
             formatBeforeSaveMiddlewareFactory(this.controller.resource),
             ...this.controller.resource.createValidators,
             validationMiddleware,
@@ -40,7 +40,7 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
     public get putHandlers(): RequestHandler[] {
         return [
             toIdSanitizer,
-            allowedFieldsMiddlewareFactory(this.controller.resource.allowedFields),
+            allowedFieldsMiddlewareFactory<D>(this.controller.resource.allowedFields),
             formatBeforeSaveMiddlewareFactory<T, D>(this.controller.resource),
             ...this.controller.resource.updateValidators,
             validationMiddleware,

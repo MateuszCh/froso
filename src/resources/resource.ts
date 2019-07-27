@@ -13,7 +13,7 @@ import {
 } from 'mongodb';
 
 import { frosoMongo } from '../config';
-import { filterEmpty, requiredValidatorFactory, uniqueValidatorFactory } from '../utils';
+import { filterEmpty, requiredValidatorFactory, typeValidatorFactory, uniqueValidatorFactory } from '../utils';
 
 export interface IResourceData {
     created: number;
@@ -25,46 +25,58 @@ export interface IResourceData {
 export interface IResourceRequestData {
     id?: number;
     resourceType?: string;
+    created?: number;
 }
 
 export abstract class Resource<T extends IResourceData, D extends IResourceRequestData> {
     public abstract readonly resourceType: string;
     public abstract readonly collectionName: string;
+    public abstract defaults: D;
 
-    public _createValidators: ValidationChain[] = [];
-    public _updateValidators: ValidationChain[] = [];
-    public _typesValidators: ValidationChain[] = [];
+    public customCreateValidators: ValidationChain[] = [];
+    public customUpdateValidators: ValidationChain[] = [];
+    public customValidators: ValidationChain[] = [];
+
+    public stringFields: string[] = [];
+    public numberFields: string[] = [];
 
     public requiredFields: string[] = [];
     public notRequiredFields: string[] = [];
     public uniqueFields: string[] = [];
 
-    public abstract defaults: D;
+    public get typesValidators(): ValidationChain[] {
+        return [
+            typeValidatorFactory<D>(this.stringFields, 'string'),
+            typeValidatorFactory<D>(this.numberFields, 'number')
+        ];
+    }
 
     public get allowedFields(): string[] {
         return [...this.requiredFields, ...this.notRequiredFields];
     }
 
-    public get createValidators(): ValidationChain[] {
+    public get generalValidators(): ValidationChain[] {
         return [
             requiredValidatorFactory<D>(this.requiredFields),
-            uniqueValidatorFactory(this.uniqueFields, this),
-            ...this._typesValidators,
-            ...this._createValidators
+            uniqueValidatorFactory<T, D>(this.uniqueFields, this),
+            ...this.typesValidators
         ];
     }
 
+    public get createValidators(): ValidationChain[] {
+        return [...this.generalValidators, ...this.customCreateValidators, ...this.customValidators];
+    }
+
     public get updateValidators(): ValidationChain[] {
-        return [
-            requiredValidatorFactory<D>(this.requiredFields),
-            uniqueValidatorFactory(this.uniqueFields, this),
-            ...this._typesValidators,
-            ...this._updateValidators
-        ];
+        return [...this.generalValidators, ...this.customUpdateValidators, ...this.customValidators];
     }
 
     public formatBeforeSave(data: D): D {
         return data;
+    }
+
+    public formatManyBeforeSave(data: D[]): D[] {
+        return map(data, modelData => this.formatBeforeSave(modelData));
     }
 
     public get collection(): Collection {

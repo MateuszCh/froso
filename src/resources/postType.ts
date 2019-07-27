@@ -1,13 +1,6 @@
 import { InsertOneWriteOpResult } from 'mongodb';
 
-import {
-    fieldsIdsValidator,
-    fieldsRequiredValidator,
-    fieldsStringValidator,
-    formatFields,
-    formatId,
-    isStringValidatorFactory
-} from '../utils';
+import { fieldsValidatorFactory, formatFields, formatId } from '../utils';
 import { IResourceData, IResourceRequestData, Resource } from './resource';
 
 export interface IFieldData {
@@ -49,19 +42,22 @@ export const stringFieldDataFields = [...requiredFieldDataFields, 'selectOptions
 export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
     public readonly resourceType = 'post_type';
     public readonly collectionName = 'post_types';
-    public requiredFields = ['title', 'pluralTitle', 'type'];
-    public notRequiredFields = ['fields'];
-    public uniqueFields = ['type'];
+
     public defaults = {
         fields: []
     };
-    public _createValidators = [fieldsIdsValidator, fieldsRequiredValidator, fieldsStringValidator];
-    public _updateValidators = [fieldsIdsValidator, fieldsRequiredValidator, fieldsStringValidator];
-    public _typesValidators = [
-        isStringValidatorFactory('title'),
-        isStringValidatorFactory('pluralTitle'),
-        isStringValidatorFactory('type')
+
+    public customValidators = [
+        fieldsValidatorFactory('id'),
+        fieldsValidatorFactory('required'),
+        fieldsValidatorFactory('string')
     ];
+
+    public stringFields = ['title', 'pluralTitle', 'type'];
+
+    public requiredFields = ['title', 'pluralTitle', 'type'];
+    public notRequiredFields = ['fields'];
+    public uniqueFields = ['type'];
 
     public formatBeforeSave(data: IPostTypeRequestData): IPostTypeRequestData {
         const postType = { ...data };
