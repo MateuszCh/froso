@@ -59,16 +59,17 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
         return [
             requiredValidatorFactory<D>(this.requiredFields),
             uniqueValidatorFactory<T, D>(this.uniqueFields, this),
-            ...this.typesValidators
+            ...this.typesValidators,
+            ...this.customValidators
         ];
     }
 
     public get createValidators(): ValidationChain[] {
-        return [...this.generalValidators, ...this.customCreateValidators, ...this.customValidators];
+        return [...this.generalValidators, ...this.customCreateValidators];
     }
 
     public get updateValidators(): ValidationChain[] {
-        return [...this.generalValidators, ...this.customUpdateValidators, ...this.customValidators];
+        return [...this.generalValidators, ...this.customUpdateValidators];
     }
 
     public formatBeforeSave(data: D): D {
