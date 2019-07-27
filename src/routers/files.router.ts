@@ -4,10 +4,10 @@ import { FilesController } from '../controllers';
 import { IFileData, IFileRequestData } from '../resources';
 import {
     allowedFieldsFilesMiddlewareFactory,
+    allowedFieldsMiddlewareFactory,
     asyncMiddleware,
     formatFilesBeforeSaveMiddlewareFactory,
-    validationMiddleware,
-    allowedFieldsMiddlewareFactory
+    validationMiddleware
 } from '../utils';
 import { FrosoMulter } from './../config';
 import { AbstractRouter } from './abstract.router';

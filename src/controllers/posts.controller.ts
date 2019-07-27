@@ -15,7 +15,7 @@ export class PostsController extends AbstractController<IPostData, IPostRequestD
             const promises = map(groupedResources, (resources: IPostData[], postType) => {
                 return this.postTypeResource.update(
                     { type: postType },
-                    { $pushAll: { posts: map(resources, resource => resource.id) } }
+                    { $push: { posts: { $each: map(resources, resource => resource.id) } } }
                 );
             });
 
