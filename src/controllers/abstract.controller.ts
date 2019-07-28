@@ -72,7 +72,6 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
         const id: number = req.params.id;
         const data = req.body;
         const updateResult = await this.resource.updateById(id, data);
-
         const defaultErrorMessage = `There was an error updating ${this.resource.resourceType} with id: ${id}`;
 
         if (updateResult.ok && updateResult.ok === 1) {

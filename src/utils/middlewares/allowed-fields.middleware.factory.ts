@@ -1,13 +1,15 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { map, pick } from 'lodash';
+import { isArray, map, pick } from 'lodash';
 
 import { toArray } from '../functions';
 import { IResourceRequestData } from './../../resources';
 
 export function allowedFieldsMiddlewareFactory<D extends IResourceRequestData>(fields: string[]): RequestHandler {
     return (req: Request, res: Response, next: NextFunction): void => {
+        const singleMode = !isArray(req.body);
         const bodyArray: D[] = toArray<D>(req.body);
-        req.body = map(bodyArray, dataModel => pick(dataModel, fields));
+        const models = map(bodyArray, dataModel => pick(dataModel, fields));
+        req.body = singleMode ? models[0] : models;
         next();
     };
 }

@@ -15,7 +15,7 @@ export class PostTypesController extends AbstractController<IPostTypeData, IPost
     }
 
     protected async onUpdate(updatedResource: IPostTypeData): Promise<IOnResponse> {
-        if (updatedResource) {
+        if (updatedResource && updatedResource.posts) {
             await this.postResource.update(
                 { id: { $in: updatedResource.posts } },
                 { $set: { type: updatedResource.type } }
