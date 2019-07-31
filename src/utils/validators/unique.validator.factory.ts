@@ -20,7 +20,7 @@ export function uniqueValidatorFactory<T extends IResourceData, D extends IResou
             return true;
         }
 
-        data = toArray<D>(data);
+        data = toArray(data);
 
         const id = options.req.params.id || 0;
 

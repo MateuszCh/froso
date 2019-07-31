@@ -17,7 +17,7 @@ export function typeValidatorFactory<T extends IResourceRequestData>(
     type: 'number' | 'string' | 'array'
 ): ValidationChain {
     return body().custom((data: T | T[]) => {
-        data = toArray<T>(data);
+        data = toArray(data);
 
         const checkFunction = checkFunctions[type];
 

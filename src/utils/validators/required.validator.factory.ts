@@ -6,7 +6,7 @@ import { toArray } from '../functions';
 
 export function requiredValidatorFactory<T extends IResourceRequestData>(fields: string[]): ValidationChain {
     return body().custom((data: T | T[]) => {
-        data = toArray<T>(data);
+        data = toArray(data);
 
         let invalidField: string | undefined;
         const invalidModel: T | undefined = find(data, model => {

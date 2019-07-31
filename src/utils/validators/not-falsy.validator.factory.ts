@@ -6,7 +6,7 @@ import { toArray } from '../functions';
 
 export function notFalsyValidatorFactory<T extends IResourceRequestData>(fields: string[]): ValidationChain {
     return body().custom((data: T[]) => {
-        data = toArray<T>(data);
+        data = toArray(data);
 
         const falsyField = find(fields, field =>
             find(data as T[], dataModel => dataModel.hasOwnProperty(field) && !get(dataModel, field))

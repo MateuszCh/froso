@@ -1,7 +1,5 @@
 import { isArray } from 'lodash';
 
-import { IResourceRequestData } from './../../resources/resource';
-
-export function toArray<T extends IResourceRequestData = IResourceRequestData>(data: T | T[]): T[] {
+export function toArray(data: any | any[]): any[] {
     return isArray(data) ? data : [data];
 }

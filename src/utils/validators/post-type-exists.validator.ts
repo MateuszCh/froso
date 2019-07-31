@@ -8,7 +8,7 @@ export const postTypeExistsValidator: ValidationChain = body().custom(
     async (data: IPostRequestData | IPostRequestData[]) => {
         const postTypeResource = new PostType();
 
-        data = toArray<IPostRequestData>(data);
+        data = toArray(data);
 
         const postTypes = compact(map(data, dataModel => dataModel.type));
 
