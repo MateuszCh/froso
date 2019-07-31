@@ -1,5 +1,5 @@
 import { RequestHandler, Router } from 'express';
-import { map } from 'lodash';
+import { difference } from 'lodash';
 
 import { UsersController } from '../controllers';
 import { IUserData, IUserRequestData } from '../resources';
@@ -7,9 +7,8 @@ import {
     allowedFieldsMiddlewareFactory,
     asyncMiddleware,
     changePasswordValidator,
-    isNumberValidatorFactory,
-    isStringValidatorFactory,
     requiredValidatorFactory,
+    typeValidatorFactory,
     validationMiddleware
 } from '../utils';
 import { AbstractRouter } from './abstract.router';
@@ -21,9 +20,8 @@ export class UsersRouter extends AbstractRouter<IUserData, IUserRequestData> {
         return [
             requiredValidatorFactory(this.controller.changePasswordFields),
             allowedFieldsMiddlewareFactory(this.controller.changePasswordFields),
-            ...map(this.controller.changePasswordFields, field =>
-                field === 'id' ? isNumberValidatorFactory(field) : isStringValidatorFactory(field)
-            ),
+            typeValidatorFactory(difference(this.controller.changePasswordFields, ['id']), 'string'),
+            typeValidatorFactory(['id'], 'number'),
             changePasswordValidator,
             validationMiddleware,
             asyncMiddleware(this.controller.changePassword)

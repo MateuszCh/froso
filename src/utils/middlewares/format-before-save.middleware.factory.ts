@@ -1,4 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
+import { isArray } from 'lodash';
 
 import { IResourceData, IResourceRequestData, Resource } from '../../resources';
 
@@ -6,7 +7,9 @@ export function formatBeforeSaveMiddlewareFactory<T extends IResourceData, D ext
     resource: Resource<T, D>
 ): RequestHandler {
     return (req: Request, res: Response, next: NextFunction): void => {
-        req.body = resource.formatBeforeSave(req.body);
+        const singleMode = !isArray(req.body);
+
+        req.body = singleMode ? resource.formatBeforeSave(req.body) : resource.formatManyBeforeSave(req.body);
         next();
     };
 }

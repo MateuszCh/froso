@@ -4,6 +4,7 @@ import { FilesController } from '../controllers';
 import { IFileData, IFileRequestData } from '../resources';
 import {
     allowedFieldsFilesMiddlewareFactory,
+    allowedFieldsMiddlewareFactory,
     asyncMiddleware,
     formatFilesBeforeSaveMiddlewareFactory,
     validationMiddleware
@@ -25,6 +26,15 @@ export class FilesRouter extends AbstractRouter<IFileData, IFileRequestData> {
             this.multer.upload().array('files'),
             allowedFieldsFilesMiddlewareFactory(this.controller.resource.allowedFields),
             formatFilesBeforeSaveMiddlewareFactory(this.controller.resource),
+            ...this.controller.resource.createValidators,
+            validationMiddleware,
+            asyncMiddleware(this.controller.create)
+        ];
+    }
+
+    public get importHandlers(): RequestHandler[] {
+        return [
+            allowedFieldsMiddlewareFactory<IFileRequestData>(this.controller.resource.allowedFields),
             ...this.controller.resource.createValidators,
             validationMiddleware,
             asyncMiddleware(this.controller.create)

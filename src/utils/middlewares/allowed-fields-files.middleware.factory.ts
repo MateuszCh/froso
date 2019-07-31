@@ -1,8 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { isArray, isObject, mapValues, pick } from 'lodash';
 
-import { IFilesUploadData } from '../../resources';
-import { IFileRequestData } from '../../resources';
+import { IFileRequestData, IFilesUploadData } from '../../resources';
 
 export function allowedFieldsFilesMiddlewareFactory(fields: string[]): RequestHandler {
     return (req: Request, res: Response, next: NextFunction): void => {

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import * as fs from 'fs';
-import { capitalize } from 'lodash';
+import { capitalize, each, isArray } from 'lodash';
 import * as path from 'path';
 
 import { Counter, IResourceData, IResourceRequestData, Resource } from '../resources';
@@ -71,9 +71,14 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
     public updateById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
         const id: number = req.params.id;
         const data = req.body;
-        const updateResult = await this.resource.updateById(id, data);
 
         const defaultErrorMessage = `There was an error updating ${this.resource.resourceType} with id: ${id}`;
+
+        if (isArray(data)) {
+            return next(defaultErrorMessage);
+        }
+
+        const updateResult = await this.resource.updateById(id, data);
 
         if (updateResult.ok && updateResult.ok === 1) {
             if (updateResult.value) {
@@ -96,20 +101,30 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
     };
 
     public create = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-        const data: D = req.body;
+        const manyMode = isArray(req.body);
+
+        const modelsToCreate: D[] = manyMode ? req.body : [req.body];
         const collectionName = this.resource.collectionName;
         const counter = await this.counter.findByCollectionName(collectionName);
 
-        const defaultErrorMessage = `${capitalize(this.resource.resourceType)} was not created.`;
-
         if (counter) {
-            data.id = counter.counter;
-            await this.counter.incrementCounter(collectionName);
+            const counterValue = counter.counter;
+            each(modelsToCreate, (modelToCreate, i) => {
+                modelToCreate.id = counterValue + i;
+            });
+            await this.counter.incrementCounter(collectionName, modelsToCreate.length);
         }
-        const createResult = await this.resource.create(data);
+
+        const createResult = await this.resource.createMany(modelsToCreate);
+
+        const singleDefaultErrorMessage = `${capitalize(this.resource.resourceType)} was not created.`;
+        const manyDefaultErrorMessage = `${capitalize(this.resource.resourceType)}s weren't created`;
+        const defaultErrorMessage = manyMode ? manyDefaultErrorMessage : singleDefaultErrorMessage;
+
         if (createResult.result.ok && createResult.result.ok === 1) {
-            const resultData = createResult.ops[0];
-            delete resultData._id;
+            const resultData: T[] = createResult.ops;
+            each(resultData, resultModel => delete resultModel._id);
+
             const onCreateResult = await this.onCreate(resultData);
 
             const { status, error, responseStatus, response } = onCreateResult;
@@ -120,7 +135,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
                 return res.status(responseStatus || 200).send(response || resultData);
             }
 
-            return res.status(200).send(resultData);
+            return res.status(200).send(manyMode ? resultData : resultData[0]);
         } else {
             return next(defaultErrorMessage);
         }
@@ -152,7 +167,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
         return okOnResponse;
     }
 
-    protected async onCreate(createdResource: T | T[]): Promise<IOnResponse> {
+    protected async onCreate(createdResource: T[]): Promise<IOnResponse> {
         return okOnResponse;
     }
 }
