@@ -6,7 +6,6 @@ import {
     allowedFieldsMiddlewareFactory,
     asyncMiddleware,
     formatBeforeSaveMiddlewareFactory,
-    toIdSanitizer,
     validationMiddleware
 } from '../utils';
 
@@ -20,11 +19,11 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
     }
 
     public get getByIdHandlers(): RequestHandler[] {
-        return [toIdSanitizer, asyncMiddleware(this.controller.getById)];
+        return [asyncMiddleware(this.controller.getById)];
     }
 
     public get deleteByIdHandlers(): RequestHandler[] {
-        return [toIdSanitizer, asyncMiddleware(this.controller.removeById)];
+        return [asyncMiddleware(this.controller.removeById)];
     }
 
     public get postHandlers(): RequestHandler[] {
@@ -39,7 +38,6 @@ export abstract class AbstractRouter<T extends IResourceData, D extends IResourc
 
     public get putHandlers(): RequestHandler[] {
         return [
-            toIdSanitizer,
             allowedFieldsMiddlewareFactory<D>(this.controller.resource.allowedFields),
             formatBeforeSaveMiddlewareFactory<T, D>(this.controller.resource),
             ...this.controller.resource.updateValidators,

@@ -1,4 +1,3 @@
-import * as bodyParser from 'body-parser';
 import * as connectMongo from 'connect-mongo';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
@@ -54,8 +53,8 @@ export class Froso {
             }
         }
 
-        this.express.use(bodyParser.json({ limit: '1mb' }));
-        this.express.use(bodyParser.urlencoded({ extended: false, limit: '1mb' }));
+        express.json();
+        express.urlencoded({ extended: false, limit: '1mb' });
         this.express.use(cookieParser());
     }
 
@@ -67,7 +66,7 @@ export class Froso {
         const { uri, dbName, options } = this.config.mongoConfig;
 
         try {
-            const db = await frosoMongo.connectMongo(uri, dbName, options);
+            await frosoMongo.connectMongo(uri, dbName, options);
 
             // tslint:disable-next-line: variable-name
             const MongoStore = connectMongo(expressSession);
@@ -79,7 +78,7 @@ export class Froso {
                     resave: true,
                     saveUninitialized: true,
                     secret: this.config.passportConfig.sessionSecret,
-                    store: new MongoStore({ db })
+                    store: new MongoStore({ url: uri + dbName, mongoOptions: options })
                 })
             );
 
@@ -129,10 +128,10 @@ export class Froso {
         const configCollections: IFrosoCollectionConfig[] = this.config.mongoConfig.collections || [];
 
         const validDefaultCollections = defaultCollections.filter(
-            defaultCollection =>
+            (defaultCollection) =>
                 !find(
                     configCollections,
-                    configCollection => configCollection.collectionName === defaultCollection.collectionName
+                    (configCollection) => configCollection.collectionName === defaultCollection.collectionName
                 )
         );
 

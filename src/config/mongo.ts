@@ -29,7 +29,7 @@ export class FrosoMongo {
         if (this.db) {
             return this.db;
         }
-        const client: MongoClient = await MongoClient.connect(uri, options);
+        const client: MongoClient = await MongoClient.connect(uri, { ...options, useUnifiedTopology: true });
         this.db = client.db(dbName);
         forEach(this.connectListeners, (listener: OnConnectMongo) => listener(this.db));
         return this.db;

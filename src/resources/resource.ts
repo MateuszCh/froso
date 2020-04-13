@@ -1,4 +1,4 @@
-import { ValidationChain } from 'express-validator/check';
+import { ValidationChain } from 'express-validator';
 import { defaults, map, mapValues } from 'lodash';
 import {
     Collection,
@@ -9,7 +9,8 @@ import {
     InsertOneWriteOpResult,
     InsertWriteOpResult,
     UpdateQuery,
-    UpdateWriteOpResult
+    UpdateWriteOpResult,
+    RootQuerySelector
 } from 'mongodb';
 
 import { frosoMongo } from '../config';
@@ -77,7 +78,7 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     }
 
     public formatManyBeforeSave(data: D[]): D[] {
-        return map(data, modelData => this.formatBeforeSave(modelData));
+        return map(data, (modelData) => this.formatBeforeSave(modelData));
     }
 
     public get collection(): Collection {
@@ -89,13 +90,10 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     }
 
     public find(query: FilterQuery<T> = {}, projection: object = { _id: 0 }): Promise<T[]> {
-        return this.collection
-            .find(query)
-            .project(projection)
-            .toArray();
+        return this.collection.find(query).project(projection).toArray();
     }
 
-    public findOne(query: FilterQuery<T> = {}): Promise<T | null> {
+    public findOne(query: FilterQuery<T> | RootQuerySelector<T> = {}): Promise<T | null> {
         return this.collection.findOne(query, { projection: { _id: 0 } });
     }
 
@@ -117,24 +115,24 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
 
     public updateById(id: number, data: D): Promise<FindAndModifyWriteOpResultObject<T>> {
         data = this.getFullData(data);
-        const toSet = filterEmpty(data);
+        const toSet = filterEmpty(data) as D;
         const toUnset = filterEmpty(data, true);
 
         const update: UpdateQuery<D> = { $set: toSet };
         if (Object.keys(toUnset).length) {
-            update.$unset = mapValues(toUnset, () => '') as { [key: string]: '' };
+            update.$unset = mapValues(toUnset, () => '') as any;
         }
 
         return this.collection.findOneAndUpdate({ id }, update, { projection: { _id: 0 }, returnOriginal: false });
     }
 
-    public create(requestData: D): Promise<InsertOneWriteOpResult> {
+    public create(requestData: D): Promise<InsertOneWriteOpResult<T>> {
         const data = this.getFullData({ ...requestData, created: Date.now(), resourceType: this.resourceType });
 
         return this.collection.insertOne(filterEmpty(data));
     }
 
-    public createMany(requestDataArray: D[]): Promise<InsertWriteOpResult> {
+    public createMany(requestDataArray: D[]): Promise<InsertWriteOpResult<T>> {
         const dataArray = map(requestDataArray, (requestData: D) => {
             const data = filterEmpty(this.getFullData({ ...requestData }));
             data.created = data.created || Date.now();

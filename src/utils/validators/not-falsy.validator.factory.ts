@@ -1,4 +1,4 @@
-import { body, ValidationChain } from 'express-validator/check';
+import { body, ValidationChain } from 'express-validator';
 import { capitalize, find, get } from 'lodash';
 
 import { IResourceRequestData } from '../../resources';
@@ -8,8 +8,8 @@ export function notFalsyValidatorFactory<T extends IResourceRequestData>(fields:
     return body().custom((data: T[]) => {
         data = toArray(data);
 
-        const falsyField = find(fields, field =>
-            find(data as T[], dataModel => dataModel.hasOwnProperty(field) && !get(dataModel, field))
+        const falsyField = find(fields, (field) =>
+            find(data as T[], (dataModel) => dataModel.hasOwnProperty(field) && !get(dataModel, field))
         ) as string | undefined;
 
         if (falsyField) {

@@ -1,4 +1,4 @@
-import { body, ValidationChain } from 'express-validator/check';
+import { body, ValidationChain } from 'express-validator';
 import { capitalize, compact, first, map } from 'lodash';
 
 import { IFieldData, IPostTypeRequestData } from '../../resources';
@@ -18,8 +18,9 @@ export function fieldsValidatorFactory(type: 'id' | 'required' | 'string'): Vali
 
         const invalidField = first(
             compact(
-                map(data.filter(dataModel => !!dataModel.fields), modelWithFields =>
-                    checkFunction(modelWithFields.fields as IFieldData[])
+                map(
+                    data.filter((dataModel) => !!dataModel.fields),
+                    (modelWithFields) => checkFunction(modelWithFields.fields as IFieldData[])
                 )
             )
         );

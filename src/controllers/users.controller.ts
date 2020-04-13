@@ -26,7 +26,7 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
             if (!user) {
                 return res.status(401).send(info.message);
             }
-            req.logIn(user, loginErr => {
+            req.logIn(user, (loginErr) => {
                 if (loginErr) {
                     return next(loginErr);
                 }
@@ -71,8 +71,9 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
     };
 
     public getUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-        if (req.user) {
-            return res.send({ username: req.user.username, id: req.user.id });
+        const user = req.user as IUserData | undefined;
+        if (user) {
+            return res.send({ username: user.username, id: user.id });
         } else {
             return res.send(undefined);
         }
@@ -83,9 +84,9 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
             usersData &&
             uniqBy(
                 usersData.filter(
-                    user => user.username && user.password && isString(user.username) && isString(user.password)
+                    (user) => user.username && user.password && isString(user.username) && isString(user.password)
                 ),
-                user => user.username
+                (user) => user.username
             );
         if (!validUsers || !validUsers.length) {
             console.log('There is no users to create');
@@ -107,7 +108,7 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
 
         const usersToCreate = map(
             compact(
-                map(validUsers, validUser => {
+                map(validUsers, (validUser) => {
                     if (validUser.username && validUser.password && !includes(existingUsernames, validUser.username)) {
                         return pick(validUser, this.resource.allowedFields);
                     } else {
@@ -152,7 +153,7 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
             } else if (status === OnResponseStatus.Response) {
                 console.log(response);
             } else {
-                each(newUsers, newUser => console.log(`${newUser.username} was created successfully`));
+                each(newUsers, (newUser) => console.log(`${newUser.username} was created successfully`));
             }
             return newUsers;
         } else {
@@ -161,7 +162,7 @@ export class UsersController extends AbstractController<IUserData, IUserRequestD
         }
 
         function getUsernames(users: IUserRequestData[] | IUserData[]): string[] {
-            return compact(map(users, user => user.username));
+            return compact(map(users, (user) => user.username));
         }
     };
 }

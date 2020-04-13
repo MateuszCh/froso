@@ -25,7 +25,7 @@ export class Counter extends Resource<ICounterData, ICounterRequestData> {
         return this.collection.updateOne({ collectionName }, { $inc: { counter: by } });
     }
 
-    public create(data: ICounterRequestData): Promise<InsertOneWriteOpResult> {
+    public create(data: ICounterRequestData): Promise<InsertOneWriteOpResult<ICounterData>> {
         data.counter = 1;
         return super.create(data);
     }

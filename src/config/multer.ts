@@ -2,6 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from 'express';
 import * as fs from 'fs';
 import { includes, map } from 'lodash';
 import * as multer from 'multer';
+import { FileFilterCallback } from 'multer';
 import * as path from 'path';
 
 import { FrosoFile, IFileData } from '../resources';
@@ -47,7 +48,7 @@ export class FrosoMulter {
         this.fileResource
             .find()
             .then((files: IFileData[]) => {
-                this.filenames = map(files, file => file.filename);
+                this.filenames = map(files, (file) => file.filename);
                 next();
             })
             .catch(() => {
@@ -63,15 +64,11 @@ export class FrosoMulter {
         callback(null, file.originalname);
     }
 
-    public fileFilter = (
-        req: Request,
-        file: Express.Multer.File,
-        callback: (error: Error | null, acceptFile: boolean) => void
-    ) => {
+    public fileFilter = (req: Request, file: Express.Multer.File, callback: FileFilterCallback) => {
         if (includes(this.filenames, file.originalname)) {
-            callback(Error(`${file.originalname} already exists`), false);
+            callback(Error(`${file.originalname} already exists`));
         } else if (includes(this.currentlyUploading, file.originalname)) {
-            callback(Error(`You are trying to upload two files with the same filename: ${file.originalname}`), false);
+            callback(Error(`You are trying to upload two files with the same filename: ${file.originalname}`));
         }
 
         const extname = this.fileTypes.test(path.extname(file.originalname).toLowerCase());
@@ -81,11 +78,11 @@ export class FrosoMulter {
             this.currentlyUploading.push(file.originalname);
             return callback(null, true);
         } else {
-            return callback(Error(`Error: Wrong file type ${file.originalname}`), false);
+            return callback(Error(`Error: Wrong file type ${file.originalname}`));
         }
     };
 
-    public upload = () => {
+    public upload() {
         return multer({
             fileFilter: this.fileFilter,
             limits: this.limits,
@@ -94,5 +91,5 @@ export class FrosoMulter {
                 filename: this.filename
             })
         });
-    };
+    }
 }

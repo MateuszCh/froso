@@ -70,7 +70,7 @@ export class PostType extends Resource<IPostTypeData, IPostTypeRequestData> {
         return postType;
     }
 
-    public create(data: IPostTypeRequestData): Promise<InsertOneWriteOpResult> {
+    public create(data: IPostTypeRequestData): Promise<InsertOneWriteOpResult<IPostTypeData>> {
         data.posts = [];
         return super.create(data);
     }

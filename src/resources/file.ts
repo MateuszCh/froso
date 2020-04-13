@@ -1,4 +1,4 @@
-import { body } from 'express-validator/check';
+import { body } from 'express-validator';
 import { each, get, map, set } from 'lodash';
 
 import { IResourceData, IResourceRequestData, Resource } from './resource';
@@ -55,21 +55,13 @@ export class FrosoFile extends Resource<IFileData, IFileRequestData> {
     public notRequiredFields = ['title', 'description', 'author', 'place', 'catalogues', 'position'];
 
     public customValidators = [
-        body('catalogues')
-            .optional()
-            .isArray()
-            .withMessage(ARRAY_OF_STRINGS_ERROR_MESSAGE),
-        body('catalogues.*')
-            .isString()
-            .withMessage(ARRAY_OF_STRINGS_ERROR_MESSAGE),
-        body('position')
-            .optional()
-            .isNumeric()
-            .withMessage('Position has to be a number')
+        body('catalogues').optional().isArray().withMessage(ARRAY_OF_STRINGS_ERROR_MESSAGE),
+        body('catalogues.*').isString().withMessage(ARRAY_OF_STRINGS_ERROR_MESSAGE),
+        body('position').optional().isNumeric().withMessage('Position has to be a number')
     ];
 
     public formatUploadingFiles = (files: Express.Multer.File[], filesData?: IFilesUploadData): IFileRequestData[] => {
-        return map(files, file => {
+        return map(files, (file) => {
             const model: IFileRequestData = {
                 filename: file.filename,
                 size: file.size,
@@ -80,11 +72,15 @@ export class FrosoFile extends Resource<IFileData, IFileRequestData> {
                 const fileData: IFileRequestData | undefined = get(filesData, model.filename);
 
                 if (fileData) {
-                    each(this.notRequiredFields, fieldName => {
+                    each(this.notRequiredFields, (fieldName) => {
                         const value = get(fileData, fieldName);
                         if (value) {
                             if (fieldName === 'catalogues') {
-                                set(model, fieldName, map(value, (catalogue: string) => catalogue.toLowerCase()));
+                                set(
+                                    model,
+                                    fieldName,
+                                    map(value, (catalogue: string) => catalogue.toLowerCase())
+                                );
                             } else {
                                 set(model, fieldName, value);
                             }
