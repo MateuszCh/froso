@@ -78,7 +78,7 @@ export abstract class Resource<T extends IResourceData, D extends IResourceReque
     }
 
     public formatManyBeforeSave(data: D[]): D[] {
-        return map(data, (modelData) => this.formatBeforeSave(modelData));
+        return map(data, modelData => this.formatBeforeSave(modelData));
     }
 
     public get collection(): Collection {

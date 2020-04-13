@@ -11,7 +11,7 @@ export async function validationMiddleware(req: Request, res: Response, next: Ne
         return next();
     } else {
         if (req.files && isArray(req.files) && req.files.length) {
-            const filesToRemove: string[] = map(req.files, (file) => `${file.destination}/${file.filename}`);
+            const filesToRemove: string[] = map(req.files, file => `${file.destination}/${file.filename}`);
             try {
                 await removeManyFiles(filesToRemove);
             } catch (err) {

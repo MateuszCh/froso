@@ -24,7 +24,7 @@ export function uniqueValidatorFactory<T extends IResourceData, D extends IResou
 
         let duplicatedField: string = '';
 
-        each(uniqueFieldsModels, (uniqueFieldsModel) => {
+        each(uniqueFieldsModels, uniqueFieldsModel => {
             if (duplicatedField) {
                 return false;
             }

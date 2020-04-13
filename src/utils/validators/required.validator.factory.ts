@@ -9,7 +9,7 @@ export function requiredValidatorFactory<T extends IResourceRequestData>(fields:
         data = toArray(data);
 
         let invalidField: string | undefined;
-        const invalidModel: T | undefined = find(data, (model) => {
+        const invalidModel: T | undefined = find(data, model => {
             invalidField = findFalsyField<T>(fields, model);
             return !!invalidField;
         });
@@ -25,7 +25,7 @@ function getError(invalidField: string): string {
 }
 
 function findFalsyField<T extends IResourceRequestData>(fields: string[], model: T): string | undefined {
-    return find(fields, (field) => {
+    return find(fields, field => {
         const value = get(model, field);
         return !value && value !== false;
     });

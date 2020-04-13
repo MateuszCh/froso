@@ -10,12 +10,12 @@ export const postTypeExistsValidator: ValidationChain = body().custom(
 
         data = toArray(data);
 
-        const postTypes = compact(map(data, (dataModel) => dataModel.type));
+        const postTypes = compact(map(data, dataModel => dataModel.type));
 
         if (postTypes.length) {
             const postTypesModels = await postTypeResource.find({ type: { $in: postTypes } });
 
-            const foundPostTypes = map(postTypesModels, (postTypeModel) => postTypeModel.type);
+            const foundPostTypes = map(postTypesModels, postTypeModel => postTypeModel.type);
             const notFoundPostTypes = difference(postTypes, foundPostTypes);
 
             if (notFoundPostTypes.length) {

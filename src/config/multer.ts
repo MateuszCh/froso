@@ -48,7 +48,7 @@ export class FrosoMulter {
         this.fileResource
             .find()
             .then((files: IFileData[]) => {
-                this.filenames = map(files, (file) => file.filename);
+                this.filenames = map(files, file => file.filename);
                 next();
             })
             .catch(() => {

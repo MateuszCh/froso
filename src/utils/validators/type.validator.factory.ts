@@ -22,7 +22,7 @@ export function typeValidatorFactory<T extends IResourceRequestData>(
         const checkFunction = checkFunctions[type];
 
         let invalidField: string | undefined;
-        const invalidModel: T | undefined = find(data, (model) => {
+        const invalidModel: T | undefined = find(data, model => {
             invalidField = findInvalidType<T>(fields, model, checkFunction);
             return !!invalidField;
         });
@@ -42,7 +42,7 @@ function findInvalidType<T extends IResourceRequestData>(
     model: T,
     checkFunction: CheckFunction
 ): string | undefined {
-    return find(fields, (field) => {
+    return find(fields, field => {
         const value = get(model, field);
         return !isUndefined(value) && !checkFunction(value);
     });

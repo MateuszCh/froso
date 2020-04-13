@@ -128,10 +128,10 @@ export class Froso {
         const configCollections: IFrosoCollectionConfig[] = this.config.mongoConfig.collections || [];
 
         const validDefaultCollections = defaultCollections.filter(
-            (defaultCollection) =>
+            defaultCollection =>
                 !find(
                     configCollections,
-                    (configCollection) => configCollection.collectionName === defaultCollection.collectionName
+                    configCollection => configCollection.collectionName === defaultCollection.collectionName
                 )
         );
 

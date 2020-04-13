@@ -61,7 +61,7 @@ export class FrosoFile extends Resource<IFileData, IFileRequestData> {
     ];
 
     public formatUploadingFiles = (files: Express.Multer.File[], filesData?: IFilesUploadData): IFileRequestData[] => {
-        return map(files, (file) => {
+        return map(files, file => {
             const model: IFileRequestData = {
                 filename: file.filename,
                 size: file.size,
@@ -72,7 +72,7 @@ export class FrosoFile extends Resource<IFileData, IFileRequestData> {
                 const fileData: IFileRequestData | undefined = get(filesData, model.filename);
 
                 if (fileData) {
-                    each(this.notRequiredFields, (fieldName) => {
+                    each(this.notRequiredFields, fieldName => {
                         const value = get(fileData, fieldName);
                         if (value) {
                             if (fieldName === 'catalogues') {

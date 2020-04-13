@@ -138,7 +138,7 @@ export abstract class AbstractController<T extends IResourceData, D extends IRes
 
         if (createResult.result.ok && createResult.result.ok === 1) {
             const resultData: T[] = createResult.ops;
-            each(resultData, (resultModel) => delete resultModel._id);
+            each(resultData, resultModel => delete resultModel._id);
 
             const onCreateResult = await this.onCreate(resultData);
 

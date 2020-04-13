@@ -19,8 +19,8 @@ export function fieldsValidatorFactory(type: 'id' | 'required' | 'string'): Vali
         const invalidField = first(
             compact(
                 map(
-                    data.filter((dataModel) => !!dataModel.fields),
-                    (modelWithFields) => checkFunction(modelWithFields.fields as IFieldData[])
+                    data.filter(dataModel => !!dataModel.fields),
+                    modelWithFields => checkFunction(modelWithFields.fields as IFieldData[])
                 )
             )
         );
